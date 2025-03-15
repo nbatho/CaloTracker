@@ -34,7 +34,7 @@ export default function TabLayout() {
           },
           default: {},
         }),
-        headerRight: renderHeaderRight, // Add settings icon
+        
       }}>
       <Tabs.Screen
         name="index"
@@ -49,7 +49,7 @@ export default function TabLayout() {
               </Text>
             </View>
           ),
-          
+          // headerRight: renderHeaderRight, // Add settings icon
         }}
       />
       <Tabs.Screen

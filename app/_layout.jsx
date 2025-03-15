@@ -11,7 +11,7 @@ import store from '../components/redux/store';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { View, StyleSheet } from 'react-native';
-
+// import CameraScreen from '../app/camera';
 SplashScreen.preventAutoHideAsync();
 
 const LightTheme = {

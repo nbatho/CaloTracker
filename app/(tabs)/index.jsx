@@ -1,11 +1,14 @@
+// HomeScreen.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import RingProgress from '../../components/RingProgress';
+import { useNavigation } from '@react-navigation/native'; // Import the hook
 
 export default function HomeScreen() {
   const theme = useColorScheme();
   const isDarkMode = theme === 'dark';
+  const navigation = useNavigation(); // Use the navigation hook
 
   const [sectionsData, setSectionsData] = useState({
     Activity: [],
@@ -21,7 +24,7 @@ export default function HomeScreen() {
 
   const calculateCalo = 2137; // Example calorie calculation
 
-  // Function to add an item
+  // Function to add an item to a section
   const addItem = (section) => {
     if (sectionsData[section].length < 3) {
       setSectionsData((prev) => ({
@@ -29,6 +32,15 @@ export default function HomeScreen() {
         [section]: [...prev[section], `Item ${prev[section].length + 1}`]
       }));
     }
+  };
+
+  // Function to add a new section
+  const addSection = () => {
+    const newSectionName = `New Section ${Object.keys(sectionsData).length + 1}`;
+    setSectionsData((prev) => ({
+      ...prev,
+      [newSectionName]: []
+    }));
   };
 
   // Function to delete an item
@@ -99,11 +111,9 @@ export default function HomeScreen() {
                   <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
                 </TouchableOpacity>
               )}
-              
             </View>
           </View>
-        )
-        )}
+        ))}
       </ScrollView>
 
       {/* Delete Confirmation Modal */}
@@ -124,6 +134,14 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* + Button Positioned at Bottom Right for New Section */}
+      <TouchableOpacity
+        style={[styles.plusButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+        onPress={() => navigation.navigate('Camera')} // Navigate to Camera screen
+      >
+        <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -160,10 +178,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 10,
     backgroundColor: 'transparent',
-  },
-  plus: {
-    fontSize: 30,
-    fontWeight: 'bold',
   },
   nutritionContainer: {
     flexDirection: 'row',
@@ -206,5 +220,24 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     width: 80,
+  },
+  plusButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5, // Shadow effect for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  plus: {
+    fontSize: 40,
+    fontWeight: 'bold',
   },
 });
