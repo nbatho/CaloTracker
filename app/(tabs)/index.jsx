@@ -1,63 +1,129 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import RingProgress from '../../components/RingProgress';
 
 export default function HomeScreen() {
-  const caculateCalo = 2137;
-  const theme = useColorScheme(); // Get the current color scheme (light or dark)
+  const theme = useColorScheme();
+  const isDarkMode = theme === 'dark';
 
-  const isDarkMode = theme === 'dark'; // Check if the current theme is dark mode
+  const [sectionsData, setSectionsData] = useState({
+    Activity: [],
+    Breakfast: [],
+    Lunch: [],
+    Dinner: [],
+    Snack: []
+  });
+
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const calculateCalo = 2137; // Example calorie calculation
+
+  // Function to add an item
+  const addItem = (section) => {
+    if (sectionsData[section].length < 3) {
+      setSectionsData((prev) => ({
+        ...prev,
+        [section]: [...prev[section], `Item ${prev[section].length + 1}`]
+      }));
+    }
+  };
+
+  // Function to delete an item
+  const deleteItem = () => {
+    setSectionsData((prev) => ({
+      ...prev,
+      [selectedSection]: prev[selectedSection].filter((item) => item !== selectedItem)
+    }));
+    setModalVisible(false);
+  };
+
+  // Handle long press to delete
+  const handleLongPress = (section, item) => {
+    setSelectedItem(item);
+    setSelectedSection(section);
+    setModalVisible(true);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F5F5F5' }]}>
-      {/* Large Main Ring */}
-      <View style={{ marginBottom: 20 }}>
-        <RingProgress progress={100} size={200} strokeWidth={15} kcalLeft={caculateCalo} />
-      </View>
-
-      {/* Nutrition Stats */}
-      <View style={styles.nutritionContainer}>
-        {/* Carbs */}
-        <View style={styles.nutritionItem}>
-          <RingProgress progress={0} size={30} strokeWidth={8} />
-          <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}> 0/320 g carbs</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        
+        {/* Large Main Ring */}
+        <View style={{ marginBottom: 20 }}>
+          <RingProgress progress={100} size={200} strokeWidth={15} kcalLeft={calculateCalo} />
         </View>
 
-        {/* Fat */}
-        <View style={styles.nutritionItem}>
-          <RingProgress progress={0} size={30} strokeWidth={8} />
-          <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}> 0/59 g fat</Text>
+        {/* Nutrition Stats */}
+        <View style={styles.nutritionContainer}>
+          {["Carbs", "Fat", "Protein"].map((nutrient, index) => (
+            <View key={index} style={styles.nutritionItem}>
+              <RingProgress progress={0} size={30} strokeWidth={8} />
+              <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
+                0/320 g {nutrient.toLowerCase()}
+              </Text>
+            </View>
+          ))}
         </View>
 
-        {/* Protein */}
-        <View style={styles.nutritionItem}>
-          <RingProgress progress={0} size={30} strokeWidth={8} />
-          <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}> 0/80 g protein</Text>
-        </View>
-      </View>
+        {/* Sections */}
+        {Object.keys(sectionsData).map((section, index) => (
+          <View key={index} style={[styles.section]}>
+            {/* Section Title */}
+            <Text style={[styles.sectionTitle, { color: isDarkMode ? 'white' : 'black' }]}>
+              {section === "Activity" && <FontAwesome5 name="running" size={16} color={isDarkMode ? 'white' : 'black'} />}
+              {section === "Breakfast" && <FontAwesome5 name="bread-slice" size={16} color={isDarkMode ? 'white' : 'black'} />}
+              {section === "Lunch" && <FontAwesome5 name="hamburger" size={16} color={isDarkMode ? 'white' : 'black'} />}
+              {section === "Dinner" && <FontAwesome5 name="utensils" size={16} color={isDarkMode ? 'white' : 'black'} />}
+              {section === "Snack" && <FontAwesome5 name="cookie" size={16} color={isDarkMode ? 'white' : 'black'} />}
+              {"  "}{section}
+            </Text>
 
-      {/* Sections */}
-      {["Activity", "Breakfast", "Lunch", "Dinner", "Snack"].map((section, index) => (
-        <View key={index} style={[styles.section, { backgroundColor: isDarkMode ? '#161616' : '#E0E0E0' }]}>
-          <Text style={[styles.sectionTitle, { color: isDarkMode ? 'white' : 'black' }]}>
-            {section === "Activity" && <FontAwesome5 name="running" size={16} color={isDarkMode ? 'white' : 'black'} />}
-            {section === "Breakfast" && <FontAwesome5 name="bread-slice" size={16} color={isDarkMode ? 'white' : 'black'} />}
-            {section === "Lunch" && <FontAwesome5 name="hamburger" size={16} color={isDarkMode ? 'white' : 'black'} />}
-            {section === "Dinner" && <FontAwesome5 name="utensils" size={16} color={isDarkMode ? 'white' : 'black'} />}
-            {section === "Snack" && <FontAwesome5 name="cookie" size={16} color={isDarkMode ? 'white' : 'black'} />}
-            {"  "}{section}
-          </Text>
-          <TouchableOpacity style={styles.addButton}>
-            <Text style={styles.plus}>+</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
+            {/* Data Grid (Item Next to + Button) */}
+            <View style={styles.dataContainer}>
+              {sectionsData[section].map((item, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.dataItem}
+                  onLongPress={() => handleLongPress(section, item)}
+                >
+                  <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{item}</Text>
+                </TouchableOpacity>
+              ))}
 
-      {/* Floating Add Button */}
-      <TouchableOpacity style={[styles.floatingButton, { backgroundColor: isDarkMode ? 'green' : '#4CAF50' }]}>
-        <Text style={styles.plus}>+</Text>
-      </TouchableOpacity>
+              {/* + Button (Only If There’s Space) */}
+              {sectionsData[section].length < 3 && (
+                <TouchableOpacity style={styles.dataItem} onPress={() => addItem(section)}>
+                  <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
+                </TouchableOpacity>
+              )}
+              
+            </View>
+          </View>
+        )
+        )}
+      </ScrollView>
+
+      {/* Delete Confirmation Modal */}
+      <Modal animationType="slide" transparent={true} visible={modalVisible}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
+              Do you want to delete "{selectedItem}"?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+                <Text style={{ color: 'black' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
+                <Text style={{ color: 'white' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -67,10 +133,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  scrollContainer: {
+    paddingBottom: 100, // Ensure content is scrollable
+  },
   section: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -79,28 +145,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  addButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'gray',
+  dataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  dataItem: {
+    width: 80, // Square Size
+    height: 80, // Square Size
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 10,
+    backgroundColor: 'transparent',
   },
   plus: {
-    color: 'white',
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: 'bold',
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   nutritionContainer: {
     flexDirection: 'row',
@@ -119,5 +182,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
     flexShrink: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: 250,
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  modalButton: {
+    padding: 10,
+    margin: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: 80,
   },
 });

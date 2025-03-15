@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Platform, StyleSheet, useColorScheme, Dimensions, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { 
+  View, Text, ActivityIndicator, Platform, StyleSheet, 
+  useColorScheme, Dimensions, TouchableOpacity, ScrollView, 
+  KeyboardAvoidingView, Modal 
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSlice, createAsyncThunk, configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -9,6 +13,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const { height, width } = Dimensions.get('window');
 
+// Load calendar permissions
 export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () => {
   const { status } = await CalendarAPI.requestCalendarPermissionsAsync();
   if (status !== 'granted') throw new Error('Calendar permission denied');
@@ -17,12 +22,13 @@ export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () =>
   return calendars;
 });
 
+// Redux slice
 const diarySlice = createSlice({
   name: 'diary',
-  initialState: { calendars: [], loading: false, error: null },
+  initialState: { calendars: [], loading: false, error: null, activities: {} },
   reducers: {
     resetActivities: (state) => {
-      state.activities = {}; // Reset activities when a new day starts
+      state.activities = {}; 
     },
   },
   extraReducers: (builder) => {
@@ -48,26 +54,64 @@ export default function DiaryScreen() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
-  // ✅ Default selected day is today
-  const today = new Date().toISOString().split('T')[0]; 
-  const [selectedDate, setSelectedDate] = useState(today);
-  const [lastUpdatedDate, setLastUpdatedDate] = useState(today); // To track last updated date
+  const getTodayDate = () => new Date().toISOString().split('T')[0]; 
+
+  const [selectedDate, setSelectedDate] = useState(getTodayDate());
+  const [lastUpdatedDate, setLastUpdatedDate] = useState(getTodayDate());
 
   useEffect(() => {
     dispatch(loadCalendars());
 
-    // ✅ Reset data when the date changes
-    if (lastUpdatedDate !== today) {
-      dispatch(resetActivities());
-      setLastUpdatedDate(today);
-    }
-  }, [dispatch, today, lastUpdatedDate]);
+    const checkDateChange = setInterval(() => {
+      const today = getTodayDate();
+      setLastUpdatedDate((prevDate) => {
+        if (prevDate !== today) {
+          dispatch(resetActivities());
+          return today;
+        }
+        return prevDate;
+      });
+    }, 60 * 1000); // Check every minute
+
+    return () => clearInterval(checkDateChange);
+  }, [dispatch]);
 
   const backgroundColor = isDarkMode ? '#121212' : '#fff';
   const textColor = isDarkMode ? '#ffffff' : '#000000';
 
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
+  };
+
+  const [sectionsData, setSectionsData] = useState({
+    Activity: [],
+    Breakfast: [],
+    Lunch: [],
+    Dinner: [],
+    Snack: []
+  });
+
+  const addItem = (section) => {
+    if (sectionsData[section].length < 3) {
+      setSectionsData((prev) => ({
+        ...prev,
+        [section]: [...prev[section], `Item ${prev[section].length + 1}`]
+      }));
+    }
+  };
+
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
+
+  // Delete Item Function
+  const deleteItem = () => {
+    setSectionsData((prev) => {
+      const updatedSection = prev[selectedSection].filter((item) => item !== selectedItem);
+      return { ...prev, [selectedSection]: updatedSection };
+    });
+    setModalVisible(false);
   };
 
   return (
@@ -80,26 +124,24 @@ export default function DiaryScreen() {
         ) : (
           <>
             <View style={styles.calendarWrapper}>
-            <Calendar
-              style={[styles.calendar]}
-              theme={{
-                calendarBackground: isDarkMode ? '#121212' : '#ffffff', 
-                textSectionTitleColor: isDarkMode ? '#ffffff' : '#000000', 
-                dayTextColor: isDarkMode ? '#ffffff' : '#000000', 
-                todayTextColor: isDarkMode ? '#ff8c00' : '#ff4500',
-                selectedDayBackgroundColor: isDarkMode ? '#555' : '#007bff',
-                selectedDayTextColor: '#ffffff',
-                monthTextColor: isDarkMode ? '#ffffff' : '#000000', 
-                arrowColor: isDarkMode ? '#ffffff' : '#000000', 
-              }}
-              onDayPress={handleDayPress}
-              markedDates={{ [selectedDate]: { selected: true, selectedColor: 'blue' } }}
-            />
-
+              <Calendar
+                style={[styles.calendar]}
+                theme={{
+                  calendarBackground: backgroundColor,
+                  textSectionTitleColor: textColor,
+                  dayTextColor: textColor,
+                  todayTextColor: isDarkMode ? '#ff8c00' : '#ff4500',
+                  selectedDayBackgroundColor: isDarkMode ? '#555' : '#007bff',
+                  selectedDayTextColor: '#ffffff',
+                  monthTextColor: textColor,
+                  arrowColor: textColor,
+                }}
+                onDayPress={handleDayPress}
+                markedDates={{ [selectedDate]: { selected: true, selectedColor: 'blue' } }}
+              />
             </View>
 
-            {/* ✅ Selected Date Display */}
-            <View style={[styles.selectedDateContainer, { backgroundColor: isDarkMode ? '#161616' : '#E0E0E0' }]}>
+            <View style={styles.selectedDateContainer}>
               <Text style={[styles.selectedDateText, { color: textColor }]}>
                 Selected Date: {new Date(selectedDate).toLocaleDateString('en-US', {
                   month: 'long', day: 'numeric', year: 'numeric'
@@ -107,26 +149,62 @@ export default function DiaryScreen() {
               </Text>
             </View>
 
-            <View style={styles.sectionsContainer}>
-              {["Activity", "Breakfast", "Lunch", "Dinner", "Snack"].map((section, index) => (
-                <View key={index} style={[styles.section, { backgroundColor: isDarkMode ? '#161616' : '#E0E0E0' }]}>
-                  <Text style={[styles.sectionTitle, { color: isDarkMode ? 'white' : 'black' }]}>
-                    {section === "Activity" && <FontAwesome5 name="running" size={16} color={isDarkMode ? 'white' : 'black'} />}
-                    {section === "Breakfast" && <FontAwesome5 name="bread-slice" size={16} color={isDarkMode ? 'white' : 'black'} />}
-                    {section === "Lunch" && <FontAwesome5 name="hamburger" size={16} color={isDarkMode ? 'white' : 'black'} />}
-                    {section === "Dinner" && <FontAwesome5 name="utensils" size={16} color={isDarkMode ? 'white' : 'black'} />}
-                    {section === "Snack" && <FontAwesome5 name="cookie" size={16} color={isDarkMode ? 'white' : 'black'} />}
-                    {"  "}{section}
-                  </Text>
-                  <TouchableOpacity style={styles.addButton} onPress={() => console.log(`Add item to ${section}`)}>
-                    <Text style={styles.plus}>+</Text>
-                  </TouchableOpacity>
+            {Object.keys(sectionsData).map((section, index) => (
+              <View key={index} style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: textColor }]}>
+                  <FontAwesome5 name={
+                    section === "Activity" ? "running" :
+                    section === "Breakfast" ? "bread-slice" :
+                    section === "Lunch" ? "hamburger" :
+                    section === "Dinner" ? "utensils" : "cookie"
+                  } size={16} color={textColor} /> {" "}
+                  {section}
+                </Text>
+
+                <View style={styles.dataContainer}>
+                  {sectionsData[section].map((item, idx) => (
+                    <TouchableOpacity 
+                      key={idx} 
+                      style={styles.dataItem} 
+                      onPress={() => {
+                        setSelectedItem(item);
+                        setSelectedSection(section);
+                        setModalVisible(true);
+                      }}
+                    >
+                      <Text style={{ color: textColor }}>{item}</Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  {sectionsData[section].length < 3 && (
+                    <TouchableOpacity style={styles.plusButton} onPress={() => addItem(section)}>
+                      <Text style={[styles.plus, { color: textColor }]}>+</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
-              ))}
-            </View>
+              </View>
+            ))}
           </>
         )}
       </ScrollView>
+
+      <Modal animationType="slide" transparent={true} visible={modalVisible}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
+              Do you want to delete "{selectedItem}"?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+                <Text style={{ color: 'black' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
+                <Text style={{ color: 'white' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -159,38 +237,66 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  sectionsContainer: {
-    width: width * 0.95,
-    alignSelf: 'center',
-  },
   section: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginVertical: 8,
     padding: 12,
-    borderRadius: 8,
-    marginVertical: 4,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  addButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#007bff',
-    justifyContent: 'center',
+  dataContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 10,
+  },
+  dataItem: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    backgroundColor: 'transparent',
+  },
+  plusButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   plus: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: 'bold',
-    color: 'white',
   },
-  error: {
-    textAlign: 'center',
-    marginTop: 20,
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: 250,
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  modalButton: {
+    padding: 10,
+    margin: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: 80,
   },
 });
 
