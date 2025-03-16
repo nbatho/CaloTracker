@@ -24,21 +24,21 @@ const MealDetailScreen = () => {
     <View style={styles.container}>
       <Text style={[styles.title, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{productData.name}</Text>
       {productData.image_url && <Image source={{ uri: productData.image_url }} style={styles.image} />}
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Calories: {productData.energy} kcal/ 75g</Text>
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Fat: {productData.fat} g</Text>
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Carbohydrates: {productData.carbs} g</Text>
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Protein: {productData.proteins} g</Text>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Calories: {productData.energy || '0.0'} kcal/ 75g</Text>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Fat: {productData.fat || '0.0'} g</Text>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Carbohydrates: {productData.carbohydrates || '0.0'} g</Text>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Protein: {productData.proteins || '0.0'} g</Text>
 
       <Text style={[styles.text, styles.sectionTitle, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Nutrition Information</Text>
       <View style={styles.table}>
         {[
-          { label: "Energy", value: `${productData.energy_100g} kcal` },
-          { label: "Fat", value: `${productData.fat_100g} g` },
-          { label: "Saturated Fat", value: `${productData.saturatedFat} g` },
-          { label: "Carbohydrate", value: `${productData.carbohydrate_100g} g` },
-          { label: "Sugar", value: `${productData.sugar} g` },
-          { label: "Fiber", value: `${productData.fiber} g` },
-          { label: "Protein", value: `${productData.proteins_100g} g` },
+          { label: "Energy", value: `${productData.energy_100g || '0.0'} kcal` },
+          { label: "Fat", value: `${productData.fat_100g || '0.0'} g` },
+          { label: "Saturated Fat", value: `${productData.saturatedFat || '0.0'} g` },
+          { label: "Carbohydrate", value: `${productData.carbohydrates_100g || '0.0'} g` },
+          { label: "Sugar", value: `${productData.sugars_100g || '0.0'} g` },
+          { label: "Fiber", value: `${productData.fiber || '0.0'} g` },
+          { label: "Protein", value: `${productData.proteins_100g || '0.0'} g` },
         ].map((item, index) => (
           <View key={index} style={styles.row}>
             <Text style={[styles.cell, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{item.label}</Text>

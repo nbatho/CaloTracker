@@ -36,7 +36,8 @@ const CameraScreen = () => {
           proteins_100g: (data.product.nutriments?.proteins_100g || 0.0).toFixed(1),
           proteins: (data.product.nutriments?.proteins || 0.0).toFixed(1),
           
-          carbs: (data.product.nutriments?.carbohydrates || 0.0).toFixed(1),
+          carbohydrates_100g: (data.product.nutriments?.carbohydrates_100g || 0.0).toFixed(1),
+          carbohydrates: (data.product.nutriments?.carbohydrates || 0.0).toFixed(1),
           fat: (data.product.nutriments?.fat || 0.0).toFixed(1),
           fat_100g: (data.product.nutriments?.fat_100g || 0.0).toFixed(1),
           image_url: data.product.image_url || null,
