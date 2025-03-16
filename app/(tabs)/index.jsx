@@ -1,58 +1,34 @@
-// HomeScreen.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import RingProgress from '../../components/RingProgress';
-import { useNavigation } from '@react-navigation/native'; // Import the hook
+import { useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { addItemToSection, deleteItemFromSection } from '@/components/redux/diarySlice';
 
 export default function HomeScreen() {
   const theme = useColorScheme();
   const isDarkMode = theme === 'dark';
-  const navigation = useNavigation(); // Use the navigation hook
+  const navigation = useNavigation();
 
-  const [sectionsData, setSectionsData] = useState({
-    Activity: [],
-    Breakfast: [],
-    Lunch: [],
-    Dinner: [],
-    Snack: []
-  });
+  const dispatch = useDispatch();
+  const sectionsData = useSelector(state => state.diary.sectionsData);
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const calculateCalo = 2137; // Example calorie calculation
+  const calculateCalo = 2137;
 
-  // Function to add an item to a section
   const addItem = (section) => {
-    if (sectionsData[section].length < 3) {
-      setSectionsData((prev) => ({
-        ...prev,
-        [section]: [...prev[section], `Item ${prev[section].length + 1}`]
-      }));
-    }
+    dispatch(addItemToSection({ section, item: `Item ${sectionsData[section].length + 1}` }));
   };
 
-  // Function to add a new section
-  const addSection = () => {
-    const newSectionName = `New Section ${Object.keys(sectionsData).length + 1}`;
-    setSectionsData((prev) => ({
-      ...prev,
-      [newSectionName]: []
-    }));
-  };
-
-  // Function to delete an item
   const deleteItem = () => {
-    setSectionsData((prev) => ({
-      ...prev,
-      [selectedSection]: prev[selectedSection].filter((item) => item !== selectedItem)
-    }));
+    dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
   };
 
-  // Handle long press to delete
   const handleLongPress = (section, item) => {
     setSelectedItem(item);
     setSelectedSection(section);
@@ -93,7 +69,7 @@ export default function HomeScreen() {
               {"  "}{section}
             </Text>
 
-            {/* Data Grid (Item Next to + Button) */}
+            {/* Data Grid */}
             <View style={styles.dataContainer}>
               {sectionsData[section].map((item, idx) => (
                 <TouchableOpacity
@@ -105,7 +81,7 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               ))}
 
-              {/* + Button (Only If There’s Space) */}
+              {/* + Button */}
               {sectionsData[section].length < 3 && (
                 <TouchableOpacity style={styles.dataItem} onPress={() => addItem(section)}>
                   <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
@@ -135,10 +111,10 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      {/* + Button Positioned at Bottom Right for New Section */}
+      {/* + Button to Navigate to Camera */}
       <TouchableOpacity
         style={[styles.plusButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
-        onPress={() => navigation.navigate('Camera')} // Navigate to Camera screen
+        onPress={() => navigation.navigate('Camera')}
       >
         <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
       </TouchableOpacity>
@@ -147,97 +123,19 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  scrollContainer: {
-    paddingBottom: 100, // Ensure content is scrollable
-  },
-  section: {
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  dataContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  dataItem: {
-    width: 80, // Square Size
-    height: 80, // Square Size
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-    backgroundColor: 'transparent',
-  },
-  nutritionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 20,
-  },
-  nutritionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '30%',
-    marginBottom: 10,
-  },
-  nutritionText: {
-    fontSize: 14,
-    marginLeft: 8,
-    flexShrink: 1,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    width: 250,
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  modalButton: {
-    padding: 10,
-    margin: 5,
-    borderRadius: 5,
-    alignItems: 'center',
-    width: 80,
-  },
-  plusButton: {
-    position: 'absolute',
-    bottom: 30,
-    right: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5, // Shadow effect for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  plus: {
-    fontSize: 40,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, padding: 20 },
+  scrollContainer: { paddingBottom: 100 },
+  section: { padding: 15, borderRadius: 10, marginBottom: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold' },
+  dataContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
+  dataItem: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
+  nutritionContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', marginBottom: 20 },
+  nutritionItem: { flexDirection: 'row', alignItems: 'center', width: '30%', marginBottom: 10 },
+  nutritionText: { fontSize: 14, marginLeft: 8, flexShrink: 1 },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContent: { width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' },
+  modalButtons: { flexDirection: 'row', marginTop: 10 },
+  modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
+  plusButton: { position: 'absolute', bottom: 30, right: 30, width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
+  plus: { fontSize: 40, fontWeight: 'bold' },
 });
