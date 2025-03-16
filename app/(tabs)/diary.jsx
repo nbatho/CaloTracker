@@ -9,19 +9,23 @@ import { addItemToSection, deleteItemFromSection } from '@/components/redux/diar
 import { loadCalendars } from '@/components/redux/diarySlice';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { Provider } from 'react-redux';
+import store from '@/components/redux/store';
 
 const { height, width } = Dimensions.get('window');
 
 export default function DiaryScreen() {
   const dispatch = useDispatch();
-  const { loading, error, sectionsData } = useSelector((state) => state.diary); // 🔹 Use Redux state
+  const { loading, error, sectionsData } = useSelector((state) => state.diary); // Get sectionsData from Redux
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
   const getTodayDate = () => new Date().toISOString().split('T')[0]; 
 
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
-  const [lastUpdatedDate, setLastUpdatedDate] = useState(getTodayDate());
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
 
   useEffect(() => {
     dispatch(loadCalendars());
@@ -34,9 +38,16 @@ export default function DiaryScreen() {
     setSelectedDate(day.dateString);
   };
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedSection, setSelectedSection] = useState(null);
+  // 🔹 Add item to section
+  const addItem = (section) => {
+    dispatch(addItemToSection({ section, item: `Item ${sectionsData[section].length + 1}` }));
+  };
+
+  // 🔹 Delete item from section
+  const deleteItem = () => {
+    dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
+    setModalVisible(false);
+  };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -73,7 +84,7 @@ export default function DiaryScreen() {
               </Text>
             </View>
 
-            {/* 🔹 Use Redux sectionsData */}
+            {/* 🔹 Display sectionsData with Add/Delete */}
             {Object.keys(sectionsData).map((section, index) => (
               <View key={index} style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: textColor }]}>
@@ -91,7 +102,7 @@ export default function DiaryScreen() {
                     <TouchableOpacity 
                       key={idx} 
                       style={styles.dataItem} 
-                      onPress={() => {
+                      onLongPress={() => {
                         setSelectedItem(item);
                         setSelectedSection(section);
                         setModalVisible(true);
@@ -100,12 +111,38 @@ export default function DiaryScreen() {
                       <Text style={{ color: textColor }}>{item}</Text>
                     </TouchableOpacity>
                   ))}
+
+                  {/* 🔹 + Button to Add Items */}
+                  {sectionsData[section].length < 3 && (
+                    <TouchableOpacity style={styles.plusButton} onPress={() => addItem(section)}>
+                      <Text style={[styles.plus, { color: textColor }]}>+</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ))}
           </>
         )}
       </ScrollView>
+
+      {/* 🔹 Delete Confirmation Modal */}
+      <Modal animationType="slide" transparent={true} visible={modalVisible}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
+              Do you want to delete "{selectedItem}"?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+                <Text style={{ color: 'black' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
+                <Text style={{ color: 'white' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
