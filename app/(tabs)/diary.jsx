@@ -5,52 +5,16 @@ import {
   KeyboardAvoidingView, Modal 
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { createSlice, createAsyncThunk, configureStore } from '@reduxjs/toolkit';
-import { Provider } from 'react-redux';
+import { addItemToSection, deleteItemFromSection } from '@/components/redux/diarySlice';
+import { loadCalendars } from '@/components/redux/diarySlice';
 import { Calendar } from 'react-native-calendars';
-import * as CalendarAPI from 'expo-calendar';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const { height, width } = Dimensions.get('window');
 
-// Load calendar permissions
-export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () => {
-  const { status } = await CalendarAPI.requestCalendarPermissionsAsync();
-  if (status !== 'granted') throw new Error('Calendar permission denied');
-
-  const calendars = await CalendarAPI.getCalendarsAsync(CalendarAPI.EntityTypes.EVENT);
-  return calendars;
-});
-
-// Redux slice
-const diarySlice = createSlice({
-  name: 'diary',
-  initialState: { calendars: [], loading: false, error: null, activities: {} },
-  reducers: {
-    resetActivities: (state) => {
-      state.activities = {}; 
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(loadCalendars.pending, (state) => { state.loading = true; })
-      .addCase(loadCalendars.fulfilled, (state, action) => {
-        state.loading = false;
-        state.calendars = action.payload;
-      })
-      .addCase(loadCalendars.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      });
-  },
-});
-
-const { resetActivities } = diarySlice.actions;
-const store = configureStore({ reducer: { diary: diarySlice.reducer } });
-
 export default function DiaryScreen() {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.diary);
+  const { loading, error, sectionsData } = useSelector((state) => state.diary); // 🔹 Use Redux state
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -61,19 +25,6 @@ export default function DiaryScreen() {
 
   useEffect(() => {
     dispatch(loadCalendars());
-
-    const checkDateChange = setInterval(() => {
-      const today = getTodayDate();
-      setLastUpdatedDate((prevDate) => {
-        if (prevDate !== today) {
-          dispatch(resetActivities());
-          return today;
-        }
-        return prevDate;
-      });
-    }, 60 * 1000); // Check every minute
-
-    return () => clearInterval(checkDateChange);
   }, [dispatch]);
 
   const backgroundColor = isDarkMode ? '#121212' : '#fff';
@@ -83,36 +34,9 @@ export default function DiaryScreen() {
     setSelectedDate(day.dateString);
   };
 
-  const [sectionsData, setSectionsData] = useState({
-    Activity: [],
-    Breakfast: [],
-    Lunch: [],
-    Dinner: [],
-    Snack: []
-  });
-
-  const addItem = (section) => {
-    if (sectionsData[section].length < 3) {
-      setSectionsData((prev) => ({
-        ...prev,
-        [section]: [...prev[section], `Item ${prev[section].length + 1}`]
-      }));
-    }
-  };
-
-  // Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
-
-  // Delete Item Function
-  const deleteItem = () => {
-    setSectionsData((prev) => {
-      const updatedSection = prev[selectedSection].filter((item) => item !== selectedItem);
-      return { ...prev, [selectedSection]: updatedSection };
-    });
-    setModalVisible(false);
-  };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -149,6 +73,7 @@ export default function DiaryScreen() {
               </Text>
             </View>
 
+            {/* 🔹 Use Redux sectionsData */}
             {Object.keys(sectionsData).map((section, index) => (
               <View key={index} style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: textColor }]}>
@@ -175,36 +100,12 @@ export default function DiaryScreen() {
                       <Text style={{ color: textColor }}>{item}</Text>
                     </TouchableOpacity>
                   ))}
-
-                  {sectionsData[section].length < 3 && (
-                    <TouchableOpacity style={styles.plusButton} onPress={() => addItem(section)}>
-                      <Text style={[styles.plus, { color: textColor }]}>+</Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
               </View>
             ))}
           </>
         )}
       </ScrollView>
-
-      <Modal animationType="slide" transparent={true} visible={modalVisible}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
-              Do you want to delete "{selectedItem}"?
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
-                <Text style={{ color: 'black' }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
-                <Text style={{ color: 'white' }}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </KeyboardAvoidingView>
   );
 }
