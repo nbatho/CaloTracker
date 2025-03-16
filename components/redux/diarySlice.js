@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as CalendarAPI from 'expo-calendar';
 
-// ✅ Async action to load calendar data
+// Load calendar permissions
 export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () => {
   const { status } = await CalendarAPI.requestCalendarPermissionsAsync();
   if (status !== 'granted') throw new Error('Calendar permission denied');
@@ -10,15 +10,37 @@ export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () =>
   return calendars;
 });
 
-// ✅ Redux slice
+// Redux slice
 const diarySlice = createSlice({
   name: 'diary',
-  initialState: {
-    calendars: [],
-    loading: false,
-    error: null,
+  initialState: { 
+    calendars: [], 
+    loading: false, 
+    error: null, 
+    activities: {}, 
+    sectionsData: {
+      Activity: [],
+      Breakfast: [],
+      Lunch: [],
+      Dinner: [],
+      Snack: []
+    }
   },
-  reducers: {},
+  reducers: {
+    resetActivities: (state) => {
+      state.activities = {}; 
+    },
+    addItemToSection: (state, action) => {
+      const { section, item } = action.payload;
+      if (state.sectionsData[section].length < 3) {
+        state.sectionsData[section].push(item);
+      }
+    },
+    deleteItemFromSection: (state, action) => {
+      const { section, item } = action.payload;
+      state.sectionsData[section] = state.sectionsData[section].filter(i => i !== item);
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loadCalendars.pending, (state) => { state.loading = true; })
@@ -33,4 +55,5 @@ const diarySlice = createSlice({
   },
 });
 
+export const { addItemToSection, deleteItemFromSection, resetActivities } = diarySlice.actions;
 export default diarySlice.reducer;
