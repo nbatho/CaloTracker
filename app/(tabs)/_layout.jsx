@@ -1,4 +1,4 @@
-import { Tabs, useNavigation } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, Text, View, TouchableOpacity } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
@@ -16,8 +16,13 @@ export default function TabLayout() {
 
   // Header settings button
   const renderHeaderRight = () => (
-    <TouchableOpacity onPress={() => router.push('../setting')}> {/* Push to settings */}
-      <Ionicons name="settings-outline" size={24} color={Colors[colorScheme ?? 'light'].tint} style={{ marginRight: 16 }} />
+    <TouchableOpacity onPress={() => router.push('../setting')}>
+      <Ionicons
+        name="settings-outline"
+        size={24}
+        color={Colors[colorScheme ?? 'light'].tint}
+        style={{ marginRight: 16 }}
+      />
     </TouchableOpacity>
   );
 
@@ -34,33 +39,47 @@ export default function TabLayout() {
           },
           default: {},
         }),
-        
-      }}>
+        headerRight: renderHeaderRight,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: '',
           tabBarIcon: ({ color }) => <Entypo name="home" size={24} color={color} />,
           headerTitle: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Entypo name="home" size={24} color={Colors[colorScheme ?? 'light'].tint} />
-              <Text style={{ marginLeft: 8, fontSize: 18, fontWeight: 'bold', color: Colors[colorScheme ?? 'light'].text }}>
+              <Text
+                style={{
+                  marginLeft: 8,
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: Colors[colorScheme ?? 'light'].text,
+                }}
+              >
                 Home
               </Text>
             </View>
           ),
-          // headerRight: renderHeaderRight, // Add settings icon
         }}
       />
       <Tabs.Screen
         name="diary"
         options={{
-          title: 'Diary',
+          title: '',
           tabBarIcon: ({ color }) => <AntDesign name="book" size={24} color={color} />,
           headerTitle: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <AntDesign name="book" size={24} color={Colors[colorScheme ?? 'light'].tint} />
-              <Text style={{ marginLeft: 8, fontSize: 18, fontWeight: 'bold', color: Colors[colorScheme ?? 'light'].text }}>
+              <Text
+                style={{
+                  marginLeft: 8,
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: Colors[colorScheme ?? 'light'].text,
+                }}
+              >
                 Diary
               </Text>
             </View>
@@ -70,19 +89,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: '',
           tabBarIcon: ({ color }) => <Ionicons name="person-circle-outline" size={24} color={color} />,
           headerTitle: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="person-circle-outline" size={24} color={Colors[colorScheme ?? 'light'].tint} />
-              <Text style={{ marginLeft: 8, fontSize: 18, fontWeight: 'bold', color: Colors[colorScheme ?? 'light'].text }}>
+              <Text
+                style={{
+                  marginLeft: 8,
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: Colors[colorScheme ?? 'light'].text,
+                }}
+              >
                 Profile
               </Text>
             </View>
           ),
         }}
       />
-      {/* Remove settings tab from here */}
     </Tabs>
   );
 }
