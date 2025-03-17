@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import { addItemToSelectedDate } from "@/components/redux/diarySlice"; 
 import { Ionicons } from "@expo/vector-icons";
 
-const FOOD_ITEMS = ["Apple", "Banana", "Chicken", "Rice", "Salad"]; 
 
 const SearchScreen = () => {
   const route = useRoute();
@@ -14,14 +13,6 @@ const SearchScreen = () => {
   const { section } = route.params || {};
   const [searchQuery, setSearchQuery] = useState("");
 
-  const addItem = (item) => {
-    dispatch(addItemToSelectedDate({ section, item }));
-    navigation.goBack(); 
-  };
-
-  const filteredItems = FOOD_ITEMS.filter(item => 
-    item.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <View style={styles.container}>
@@ -42,21 +33,12 @@ const SearchScreen = () => {
           <Ionicons name="search" size={24} color="#888" />
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={filteredItems}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.itemButton} onPress={() => addItem(item)}>
-            <Text style={styles.itemText}>{item}</Text>
-          </TouchableOpacity>
-        )}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f0f0f0", paddingTop: 20 },
+  container: { flex: 1, alignItems: "center", backgroundColor: "#f0f0f0", paddingTop: 20 },
   searchWrapper: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "90%", marginBottom: 10 },
   searchContainer: { flexDirection: "row", alignItems: "center", backgroundColor: "white", borderRadius: 10, borderWidth: 1, borderColor: "#ccc", flex: 1, paddingHorizontal: 10 },
   searchIcon: { marginRight: 10 },
