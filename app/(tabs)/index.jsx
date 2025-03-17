@@ -11,7 +11,8 @@ export default function HomeScreen() {
   const isDarkMode = theme === 'dark';
 
   // Lấy dữ liệu từ Redux Store
-  const todaySelection = useSelector(state => state.diary.selectedDateSectionsData);
+  const todaySelection = useSelector(state => state.diary.todaySectionsData);
+
 
   // State để hiển thị modal xác nhận xóa
   const [selectedItem, setSelectedItem] = useState(null);

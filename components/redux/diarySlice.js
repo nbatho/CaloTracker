@@ -56,6 +56,7 @@ export const addItemToSelectedDate = createAsyncThunk('diary/addItemToSelectedDa
     allSectionsData[selectedDate][section].push(item);
     await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
     dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi thêm
+    if (selectedDate === getTodayDate()) dispatch(loadTodaySectionsData());
   }
 });
 
@@ -69,6 +70,7 @@ export const deleteItemFromSection = createAsyncThunk('diary/deleteItemFromSecti
     allSectionsData[selectedDate][section] = allSectionsData[selectedDate][section].filter(i => i !== item);
     await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
     dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi xóa
+    if (selectedDate === getTodayDate()) dispatch(loadTodaySectionsData());
   }
 });
 
@@ -79,6 +81,13 @@ const diarySlice = createSlice({
     calendars: [], 
     loading: false, 
     error: null, 
+    todaySectionsData: {
+      Activity: [],
+      Breakfast: [],
+      Lunch: [],
+      Dinner: [],
+      Snack: []
+    },
     selectedDateSectionsData: {
       Activity: [],
       Breakfast: [],
@@ -92,6 +101,9 @@ const diarySlice = createSlice({
     builder
       .addCase(loadCalendars.fulfilled, (state, action) => {
         state.calendars = action.payload;
+      })
+      .addCase(loadTodaySectionsData.fulfilled, (state, action) => {
+        state.todaySectionsData = action.payload;
       })
       .addCase(loadSelectedDateSectionsData.fulfilled, (state, action) => {
         state.selectedDateSectionsData = action.payload;
