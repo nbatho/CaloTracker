@@ -20,6 +20,7 @@
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@reduxjs/toolkit": "^2.6.1",
+    "eventemitter3": "^5.0.1",
     "expo": "~52.0.38",
     "expo-blur": "~14.0.3",
     "expo-calendar": "~14.0.6",

@@ -14,5 +14,5 @@
     "**/*.jsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "hooks/ThemeContext.js"  ]
+, "hooks/ThemeContext.js", "components/redux/eventBus.js"  ]
 }
