@@ -2,36 +2,34 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
-import { loadTodaySectionsData, addItemToSelectedDate, deleteItemFromSection } from '@/components/redux/diarySlice';
-import { useNavigation } from '@react-navigation/native'; // ✅ Import navigation
+import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } from '@/components/redux/diarySlice';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import RingProgress from '../../components/RingProgress';
-import CameraScreen from '../Camera'; // ✅ Import CameraScreen
+import CameraScreen from '../Camera';
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
-  const navigation = useNavigation(); // ✅ Get navigation instance
+  const navigation = useNavigation();
+  const route = useRoute();
   const theme = useColorScheme();
   const isDarkMode = theme === 'dark';
 
-  // Lấy dữ liệu từ Redux Store
   const todaySelection = useSelector(state => state.diary.todaySectionsData);
 
-  // State để hiển thị modal xác nhận xóa
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Load dữ liệu ngày hôm nay khi màn hình mở
   useEffect(() => {
     dispatch(loadTodaySectionsData());
   }, [dispatch]);
 
-  // Thêm mục vào Redux store
-  const addItem = (section) => {
-    dispatch(addItemToSelectedDate({ section, item: `Item ${todaySelection[section].length + 1}` }));
-  };
+  useEffect(() => {
+    if (route.params?.selectedItem && route.params?.section) {
+      dispatch(addItemToSelectedDate({ section: route.params.section, item: route.params.selectedItem }));
+    }
+  }, [route.params, dispatch]);
 
-  // Xóa mục khỏi Redux store
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
@@ -42,18 +40,6 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={{ marginBottom: 20 }}>
           <RingProgress progress={100} size={200} strokeWidth={15} kcalLeft={2137} />
-        </View>
-
-        {/* Nutrition Stats */}
-        <View style={styles.nutritionContainer}>
-          {["Carbs", "Fat", "Protein"].map((nutrient, index) => (
-            <View key={index} style={styles.nutritionItem}>
-              <RingProgress progress={0} size={30} strokeWidth={8} />
-              <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
-                0/320 g {nutrient.toLowerCase()}
-              </Text>
-            </View>
-          ))}
         </View>
 
         {Object.keys(todaySelection).map((section, index) => (
@@ -83,8 +69,11 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               ))}
 
-              {todaySelection[section].length < 3 && (
-                <TouchableOpacity style={styles.dataItem} onPress={() => addItem(section)}>
+              {['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(section) && todaySelection[section].length < 3 && (
+                <TouchableOpacity 
+                  style={styles.dataItem} 
+                  onPress={() => navigation.navigate('Search', { section })}
+                >
                   <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
                 </TouchableOpacity>
               )}
@@ -93,12 +82,10 @@ export default function HomeScreen() {
         ))}
       </ScrollView>
 
-      {/* Camera Button - Bottom Left */}
       <TouchableOpacity style={styles.cameraButton} onPress={() => navigation.navigate('Camera')}>
         <FontAwesome5 name="camera" size={24} color="white" />
       </TouchableOpacity>
 
-      {/* Modal xác nhận xóa */}
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -140,39 +127,20 @@ const styles = StyleSheet.create({
   },
   modalButtons: { flexDirection: 'row', marginTop: 10 },
   modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
-  nutritionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 20,
-  },
-  nutritionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '30%',
-    marginBottom: 10,
-  },
-  nutritionText: {
-    fontSize: 14,
-    marginLeft: 8,
-    flexShrink: 1,
-  },
   cameraButton: {
     position: 'absolute',
     bottom: 20,
-    right: 20, // ✅ Move to the bottom right
+    right: 20,
     backgroundColor: '#007bff',
     width: 50,
     height: 50,
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5, // Shadow for Android
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
 });
-
