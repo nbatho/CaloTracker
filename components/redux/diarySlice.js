@@ -60,17 +60,21 @@ export const addItemToSelectedDate = createAsyncThunk('diary/addItemToSelectedDa
   }
 });
 
-// 🎯 Xóa mục khỏi ngày được chọn
+// 🎯 Xóa mục khỏi ngày được chọn (chỉ xóa 1 mục đầu tiên trùng khớp)
 export const deleteItemFromSection = createAsyncThunk('diary/deleteItemFromSection', async ({ section, item }, { dispatch }) => {
   const selectedDate = await AsyncStorage.getItem('selectedDate');
   let allSectionsData = await AsyncStorage.getItem('allSectionsData');
   allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
 
   if (allSectionsData[selectedDate]) {
-    allSectionsData[selectedDate][section] = allSectionsData[selectedDate][section].filter(i => i !== item);
-    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
-    dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi xóa
-    if (selectedDate === getTodayDate()) dispatch(loadTodaySectionsData());
+    // 🔹 Tìm vị trí của mục cần xóa
+    const index = allSectionsData[selectedDate][section].indexOf(item);
+    if (index !== -1) {
+      allSectionsData[selectedDate][section].splice(index, 1); // ✅ Chỉ xóa 1 mục đầu tiên tìm thấy
+      await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+      dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi xóa
+      if (selectedDate === getTodayDate()) dispatch(loadTodaySectionsData());
+    }
   }
 });
 
