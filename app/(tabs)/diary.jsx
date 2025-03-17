@@ -68,7 +68,7 @@ export default function DiaryScreen() {
 
   const handleAddItem = (section) => {
     if (section === "Activity") {
-      navigation.navigate("AI"); // Chuyển hướng đến màn hình AI nếu là Activity
+      navigation.navigate("Data"); // Chuyển hướng đến màn hình AI nếu là Activity
     } else {
       navigation.navigate("Search", { section, selectedDate, fromDiary: true });
     }
