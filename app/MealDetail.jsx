@@ -1,35 +1,52 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, useColorScheme } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, Image, TouchableOpacity, useColorScheme } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router'; // ✅ Import router
 
 const MealDetailScreen = () => {
   const colorScheme = useColorScheme();
   const params = useLocalSearchParams();
+  const router = useRouter(); // ✅ Dùng router thay vì navigation
   const product = params.product;
 
-  console.log("Received params:", params);
-  console.log("Product string:", product);
+  // console.log("Received params:", params);
+  // console.log("Product string:", product);
 
   const productData = product ? JSON.parse(product) : {};
 
   if (!productData || Object.keys(productData).length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>No product details available.</Text>
+        <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
+          No product details available.
+        </Text>
       </View>
     );
   }
+
+  const handleAdd = () => {
+    // console.log("Data from MealDetail:", productData);
+    router.push({
+      pathname: "/Search",
+      params: { product: JSON.stringify(productData) }
+    });
+  };
 
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{productData.name}</Text>
       {productData.image_url && <Image source={{ uri: productData.image_url }} style={styles.image} />}
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Calories: {productData.energy || '0.0'} kcal/ 75g</Text>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
+        Calories: {productData.energy || '0.0'} kcal/ 75g
+      </Text>
       <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Fat: {productData.fat || '0.0'} g</Text>
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Carbohydrates: {productData.carbohydrates || '0.0'} g</Text>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
+        Carbohydrates: {productData.carbohydrates || '0.0'} g
+      </Text>
       <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Protein: {productData.proteins || '0.0'} g</Text>
 
-      <Text style={[styles.text, styles.sectionTitle, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Nutrition Information</Text>
+      <Text style={[styles.text, styles.sectionTitle, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
+        Nutrition Information
+      </Text>
       <View style={styles.table}>
         {[
           { label: "Energy", value: `${productData.energy_100g || '0.0'} kcal` },
@@ -47,6 +64,11 @@ const MealDetailScreen = () => {
           </View>
         ))}
       </View>
+
+      {/* Nút Add */}
+      <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+        <Text style={styles.addButtonText}>Add</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -101,6 +123,15 @@ const styles = StyleSheet.create({
     height: "100%",
     marginHorizontal: 10,
   },
+  addButton: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#007bff",
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  addButtonText: { color: "white", fontSize: 18, fontWeight: "bold" },
 });
 
 export default MealDetailScreen;
