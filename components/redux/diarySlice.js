@@ -1,7 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as CalendarAPI from 'expo-calendar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Load calendar permissions
+// 🎯 Lấy ngày hiện tại
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
+// 🎯 Load quyền truy cập lịch
 export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () => {
   const { status } = await CalendarAPI.requestCalendarPermissionsAsync();
   if (status !== 'granted') throw new Error('Calendar permission denied');
@@ -10,15 +14,72 @@ export const loadCalendars = createAsyncThunk('diary/loadCalendars', async () =>
   return calendars;
 });
 
-// Redux slice
+// 🎯 Load dữ liệu ngày hiện tại
+export const loadTodaySectionsData = createAsyncThunk('diary/loadTodaySectionsData', async () => {
+  const today = getTodayDate();
+  let allSectionsData = await AsyncStorage.getItem('allSectionsData');
+  allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
+
+  if (!allSectionsData[today]) {
+    allSectionsData[today] = { Activity: [], Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
+    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+  }
+
+  return allSectionsData[today];
+});
+
+// 🎯 Load dữ liệu của ngày được chọn
+export const loadSelectedDateSectionsData = createAsyncThunk('diary/loadSelectedDateSectionsData', async () => {
+  const selectedDate = await AsyncStorage.getItem('selectedDate');
+  let allSectionsData = await AsyncStorage.getItem('allSectionsData');
+  allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
+
+  if (!allSectionsData[selectedDate]) {
+    allSectionsData[selectedDate] = { Activity: [], Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
+    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+  }
+
+  return allSectionsData[selectedDate];
+});
+
+// 🎯 Thêm mục vào ngày được chọn
+export const addItemToSelectedDate = createAsyncThunk('diary/addItemToSelectedDate', async ({ section, item }, { dispatch }) => {
+  const selectedDate = await AsyncStorage.getItem('selectedDate');
+  let allSectionsData = await AsyncStorage.getItem('allSectionsData');
+  allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
+
+  if (!allSectionsData[selectedDate]) {
+    allSectionsData[selectedDate] = { Activity: [], Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
+  }
+
+  if (allSectionsData[selectedDate][section].length < 3) {
+    allSectionsData[selectedDate][section].push(item);
+    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+    dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi thêm
+  }
+});
+
+// 🎯 Xóa mục khỏi ngày được chọn
+export const deleteItemFromSection = createAsyncThunk('diary/deleteItemFromSection', async ({ section, item }, { dispatch }) => {
+  const selectedDate = await AsyncStorage.getItem('selectedDate');
+  let allSectionsData = await AsyncStorage.getItem('allSectionsData');
+  allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
+
+  if (allSectionsData[selectedDate]) {
+    allSectionsData[selectedDate][section] = allSectionsData[selectedDate][section].filter(i => i !== item);
+    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+    dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi xóa
+  }
+});
+
+// 🎯 Redux Slice
 const diarySlice = createSlice({
   name: 'diary',
   initialState: { 
     calendars: [], 
     loading: false, 
     error: null, 
-    activities: {}, 
-    sectionsData: {
+    selectedDateSectionsData: {
       Activity: [],
       Breakfast: [],
       Lunch: [],
@@ -26,34 +87,19 @@ const diarySlice = createSlice({
       Snack: []
     }
   },
-  reducers: {
-    resetActivities: (state) => {
-      state.activities = {}; 
-    },
-    addItemToSection: (state, action) => {
-      const { section, item } = action.payload;
-      if (state.sectionsData[section].length < 3) {
-        state.sectionsData[section].push(item);
-      }
-    },
-    deleteItemFromSection: (state, action) => {
-      const { section, item } = action.payload;
-      state.sectionsData[section] = state.sectionsData[section].filter(i => i !== item);
-    }
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(loadCalendars.pending, (state) => { state.loading = true; })
       .addCase(loadCalendars.fulfilled, (state, action) => {
-        state.loading = false;
         state.calendars = action.payload;
       })
-      .addCase(loadCalendars.rejected, (state, action) => {
+      .addCase(loadSelectedDateSectionsData.fulfilled, (state, action) => {
+        state.selectedDateSectionsData = action.payload;
+      })
+      .addCase(deleteItemFromSection.fulfilled, (state) => {
         state.loading = false;
-        state.error = action.error.message;
       });
   },
 });
 
-export const { addItemToSection, deleteItemFromSection, resetActivities } = diarySlice.actions;
 export default diarySlice.reducer;
