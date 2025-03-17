@@ -51,7 +51,7 @@ const CameraScreen = () => {
           pathname: "MealDetail",
           params: { product: JSON.stringify(productData) },
         });
-        console.log("Sending product data:", JSON.stringify(productData));
+        // console.log("Sending product data:", JSON.stringify(productData));
       } else {
         alert("Product not found in Open Food Facts database.");
         // Enable scanning again after showing the alert
