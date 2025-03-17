@@ -26,7 +26,7 @@ const MealDetailScreen = () => {
   const handleAdd = () => {
     // console.log("Data from MealDetail:", productData);
     router.push({
-      pathname: "/Search",
+      pathname: "/",
       params: { product: JSON.stringify(productData) }
     });
   };

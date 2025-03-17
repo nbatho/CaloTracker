@@ -65,10 +65,32 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="AI"
+        name="Data"
         options={{
           title: '',
           tabBarIcon: ({ color }) => <Entypo name="bar-graph" size={24} color={color} />,
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Entypo name="bar-graph" size={24} color={Colors[colorScheme ?? 'light'].tint} />
+              <Text
+                style={{
+                  marginLeft: 8,
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: Colors[colorScheme ?? 'light'].text,
+                }}
+              >
+                Data
+              </Text>
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="AI"
+        options={{
+          title: '',
+          tabBarIcon: ({ color }) => <Entypo name="classic-computer" size={24} color={color} />,
           headerTitle: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Entypo name="bar-graph" size={24} color={Colors[colorScheme ?? 'light'].tint} />

@@ -18,7 +18,8 @@ export default function HomeScreen() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const productData = route.params?.product ? JSON.parse(route.params.product) : null;
+  console.log("Received productData to Index:", productData);
   useEffect(() => {
     dispatch(loadTodaySectionsData());
   }, [dispatch]);
@@ -74,7 +75,7 @@ export default function HomeScreen() {
                   style={styles.dataItem} 
                   onPress={() => {
                     console.log("Navigating to:", section); // Check if "Activity" is passed
-                    navigation.navigate(section === "Activity" ? "AI" : "Search", { section });
+                    navigation.navigate(section === "Activity" ? "Data" : "Search", { section });
                   }}
                 >
                   <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
