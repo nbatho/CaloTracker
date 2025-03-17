@@ -5,23 +5,22 @@ import {
   KeyboardAvoidingView, Modal 
 } from 'react-native';
 import { useDispatch, useSelector, Provider } from 'react-redux';
-import { 
-  addItemToSelectedDate, deleteItemFromSection, 
-  loadSelectedDateSectionsData, loadCalendars 
-} from '@/components/redux/diarySlice';
+import { deleteItemFromSection, loadSelectedDateSectionsData } from '@/components/redux/diarySlice';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native'; // ✅ Import useFocusEffect
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import store from '@/components/redux/store';
 
 const { height, width } = Dimensions.get('window');
 
-// Function to get today's date
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 export default function DiaryScreen() {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const route = useRoute(); 
+
   const { loading, error, selectedDateSectionsData } = useSelector((state) => state.diary);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
@@ -31,20 +30,30 @@ export default function DiaryScreen() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
 
-  // ✅ Ensure selectedDate always resets to today when returning to this screen
   useFocusEffect(
     useCallback(() => {
-      const resetDateToToday = async () => {
+      const checkAndUpdateDate = async () => {
+        const storedDate = await AsyncStorage.getItem('selectedDate');
         const today = getTodayDate();
+
+        if (route.params?.fromSearch) {
+          // 🔹 Nếu từ `Search` về thì giữ nguyên ngày đã chọn
+          console.log("Trở về từ Search, giữ nguyên ngày:", storedDate);
+          return;
+        } 
+        
+        // 🔹 Nếu chuyển từ tab khác thì reset về hôm nay
+        console.log("Chuyển từ tab khác, reset về hôm nay");
         setSelectedDate(today);
         await AsyncStorage.setItem('selectedDate', today);
+
         dispatch(loadSelectedDateSectionsData());
       };
-      resetDateToToday();
-    }, [dispatch])
+
+      checkAndUpdateDate();
+    }, [dispatch, route.params])
   );
 
-  // ✅ Also update AsyncStorage when the date is manually changed
   useEffect(() => {
     const updateStoredDate = async () => {
       await AsyncStorage.setItem('selectedDate', selectedDate);
@@ -53,23 +62,21 @@ export default function DiaryScreen() {
     updateStoredDate();
   }, [selectedDate, dispatch]);
 
-  const backgroundColor = isDarkMode ? '#121212' : '#fff';
-  const textColor = isDarkMode ? '#ffffff' : '#000000';
-
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
   };
 
-  // Add item to selected date section
-  const addItem = (section) => {
-    dispatch(addItemToSelectedDate({ section, item: `Item ${selectedDateSectionsData[section].length + 1}` }));
+  const handleAddItem = (section) => {
+    navigation.navigate('Search', { section, selectedDate, fromDiary: true }); 
   };
 
-  // Delete item from selected date section
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
   };
+
+  const backgroundColor = isDarkMode ? '#121212' : '#fff';
+  const textColor = isDarkMode ? '#ffffff' : '#000000';
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -82,7 +89,7 @@ export default function DiaryScreen() {
           <>
             <View style={styles.calendarWrapper}>
               <Calendar
-                style={[styles.calendar]}
+                style={styles.calendar}
                 theme={{
                   calendarBackground: backgroundColor,
                   textSectionTitleColor: textColor,
@@ -134,7 +141,7 @@ export default function DiaryScreen() {
                   ))}
 
                   {selectedDateSectionsData[section].length < 3 && (
-                    <TouchableOpacity style={styles.plusButton} onPress={() => addItem(section)}>
+                    <TouchableOpacity style={styles.plusButton} onPress={() => handleAddItem(section)}>
                       <Text style={[styles.plus, { color: textColor }]}>+</Text>
                     </TouchableOpacity>
                   )}
@@ -165,6 +172,7 @@ export default function DiaryScreen() {
     </KeyboardAvoidingView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingBottom: 20 },
