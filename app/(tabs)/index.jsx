@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } from '@/components/redux/diarySlice';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RingProgress from '../../components/RingProgress';
-import CameraScreen from '../Camera';
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
@@ -69,10 +68,14 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               ))}
 
-              {['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(section) && todaySelection[section].length < 3 && (
+              {/* Nếu có dưới 3 mục thì hiển thị nút thêm */}
+              {todaySelection[section].length < 3 && (
                 <TouchableOpacity 
                   style={styles.dataItem} 
-                  onPress={() => navigation.navigate('Search', { section })}
+                  onPress={() => {
+                    console.log("Navigating to:", section); // Check if "Activity" is passed
+                    navigation.navigate(section === "Activity" ? "AI" : "Search", { section });
+                  }}
                 >
                   <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
                 </TouchableOpacity>

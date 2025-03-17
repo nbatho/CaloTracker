@@ -67,9 +67,12 @@ export default function DiaryScreen() {
   };
 
   const handleAddItem = (section) => {
-    navigation.navigate('Search', { section, selectedDate, fromDiary: true }); 
+    if (section === "Activity") {
+      navigation.navigate("AI"); // Chuyển hướng đến màn hình AI nếu là Activity
+    } else {
+      navigation.navigate("Search", { section, selectedDate, fromDiary: true });
+    }
   };
-
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
