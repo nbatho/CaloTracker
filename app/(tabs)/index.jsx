@@ -1,70 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, Text, StyleSheet, TouchableOpacity, useColorScheme, 
-  Modal, ScrollView 
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useSelector, useDispatch } from 'react-redux';
+import { loadTodaySectionsData, addItemToSelectedDate, deleteItemFromSection } from '@/components/redux/diarySlice';
 import RingProgress from '../../components/RingProgress';
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
+  const dispatch = useDispatch();
   const theme = useColorScheme();
   const isDarkMode = theme === 'dark';
-  const navigation = useNavigation();
 
-  const getTodayDate = () => new Date().toISOString().split('T')[0];
-  const [today, setToday] = useState(getTodayDate());
-  const [todaySelection, setTodaySelection] = useState({
-    Activity: [],
-    Breakfast: [],
-    Lunch: [],
-    Dinner: [],
-    Snack: []
-  });
+  // Lấy dữ liệu từ Redux Store
+  const todaySelection = useSelector(state => state.diary.selectedDateSectionsData);
 
+  // State để hiển thị modal xác nhận xóa
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // 🔹 Load dữ liệu của ngày hôm nay từ AsyncStorage
+  // Load dữ liệu ngày hôm nay khi màn hình mở
   useEffect(() => {
-    const loadTodayData = async () => {
-      let allSectionsData = await AsyncStorage.getItem('allSectionsData');
-      allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
+    dispatch(loadTodaySectionsData());
+  }, [dispatch]);
 
-      if (!allSectionsData[today]) {
-        allSectionsData[today] = { Activity: [], Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
-        await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
-      }
-
-      setTodaySelection(allSectionsData[today]);
-    };
-
-    loadTodayData();
-  }, [today]);
-
-  // 🔹 Thêm mục vào ngày hôm nay
-  const addItem = async (section) => {
-    let allSectionsData = await AsyncStorage.getItem('allSectionsData');
-    allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
-
-    if (allSectionsData[today][section].length < 3) {
-      allSectionsData[today][section].push(`Item ${allSectionsData[today][section].length + 1}`);
-      await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
-      setTodaySelection({ ...allSectionsData[today] });
-    }
+  // Thêm mục vào Redux store
+  const addItem = (section) => {
+    dispatch(addItemToSelectedDate({ section, item: `Item ${todaySelection[section].length + 1}` }));
   };
 
-  // 🔹 Xóa mục khỏi ngày hôm nay
-  const deleteItem = async () => {
-    let allSectionsData = await AsyncStorage.getItem('allSectionsData');
-    allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
-
-    allSectionsData[today][selectedSection] = allSectionsData[today][selectedSection].filter(item => item !== selectedItem);
-    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
-
-    setTodaySelection({ ...allSectionsData[today] });
+  // Xóa mục khỏi Redux store
+  const deleteItem = () => {
+    dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
   };
 
@@ -112,7 +78,7 @@ export default function HomeScreen() {
         ))}
       </ScrollView>
 
-      {/* Delete Confirmation Modal */}
+      {/* Modal xác nhận xóa */}
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -155,3 +121,4 @@ const styles = StyleSheet.create({
   modalButtons: { flexDirection: 'row', marginTop: 10 },
   modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
 });
+
