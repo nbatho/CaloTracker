@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { 
   View, Text, ActivityIndicator, Platform, StyleSheet, 
   useColorScheme, Dimensions, TouchableOpacity, ScrollView, 
@@ -12,9 +12,13 @@ import {
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native'; // ✅ Import useFocusEffect
 import store from '@/components/redux/store';
 
 const { height, width } = Dimensions.get('window');
+
+// Function to get today's date
+const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 export default function DiaryScreen() {
   const dispatch = useDispatch();
@@ -22,14 +26,25 @@ export default function DiaryScreen() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
-  const getTodayDate = () => new Date().toISOString().split('T')[0];
-
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
 
-  // Khi chọn ngày mới, cập nhật AsyncStorage và tải dữ liệu từ Redux
+  // ✅ Ensure selectedDate always resets to today when returning to this screen
+  useFocusEffect(
+    useCallback(() => {
+      const resetDateToToday = async () => {
+        const today = getTodayDate();
+        setSelectedDate(today);
+        await AsyncStorage.setItem('selectedDate', today);
+        dispatch(loadSelectedDateSectionsData());
+      };
+      resetDateToToday();
+    }, [dispatch])
+  );
+
+  // ✅ Also update AsyncStorage when the date is manually changed
   useEffect(() => {
     const updateStoredDate = async () => {
       await AsyncStorage.setItem('selectedDate', selectedDate);
@@ -45,12 +60,12 @@ export default function DiaryScreen() {
     setSelectedDate(day.dateString);
   };
 
-  // Thêm mục vào section của ngày được chọn
+  // Add item to selected date section
   const addItem = (section) => {
     dispatch(addItemToSelectedDate({ section, item: `Item ${selectedDateSectionsData[section].length + 1}` }));
   };
 
-  // Xóa mục khỏi section của ngày được chọn
+  // Delete item from selected date section
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
@@ -163,10 +178,6 @@ const styles = StyleSheet.create({
   dataItem: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   plusButton: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center' },
   plus: { fontSize: 30, fontWeight: 'bold' },
-  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContent: { width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' },
-  modalButtons: { flexDirection: 'row', marginTop: 10 },
-  modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
 });
 
 export function WrappedDiaryScreen() {
