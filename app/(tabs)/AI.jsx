@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-const HelloPage = () => {
+const AI = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Hello, React Native!</Text>
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HelloPage;
+export default AI;
