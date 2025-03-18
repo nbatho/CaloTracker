@@ -1,8 +1,9 @@
+// DiaryScreen.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { 
-  View, Text, ActivityIndicator, Platform, StyleSheet, 
-  useColorScheme, Dimensions, TouchableOpacity, ScrollView, 
-  KeyboardAvoidingView, Modal , Image
+import {
+  View, Text, ActivityIndicator, Platform, StyleSheet,
+  useColorScheme, Dimensions, TouchableOpacity, ScrollView,
+  KeyboardAvoidingView, Modal, Image
 } from 'react-native';
 import { useDispatch, useSelector, Provider } from 'react-redux';
 import { deleteItemFromSection, loadSelectedDateSectionsData } from '@/components/redux/diarySlice';
@@ -19,7 +20,7 @@ const getTodayDate = () => new Date().toISOString().split('T')[0];
 export default function DiaryScreen() {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const route = useRoute(); 
+  const route = useRoute();
 
   const { loading, error, selectedDateSectionsData } = useSelector((state) => state.diary);
   const colorScheme = useColorScheme();
@@ -35,12 +36,12 @@ export default function DiaryScreen() {
       const checkAndUpdateDate = async () => {
         const storedDate = await AsyncStorage.getItem('selectedDate');
         const today = getTodayDate();
-  
+
         if (route.params?.fromSearch) {
           console.log("Trở về từ Search, giữ nguyên ngày:", storedDate);
           return;
         }
-  
+
         if (storedDate !== today) {
           console.log("Chuyển từ tab khác, reset về hôm nay");
           setSelectedDate(today);
@@ -48,7 +49,7 @@ export default function DiaryScreen() {
           dispatch(loadSelectedDateSectionsData()); // Chỉ gọi khi ngày thay đổi
         }
       };
-  
+
       checkAndUpdateDate();
     }, [dispatch, route.params])
   );
@@ -56,7 +57,7 @@ export default function DiaryScreen() {
   useEffect(() => {
     const updateStoredDate = async () => {
       await AsyncStorage.setItem('selectedDate', selectedDate);
-      dispatch(loadSelectedDateSectionsData()); 
+      dispatch(loadSelectedDateSectionsData());
     };
     updateStoredDate();
   }, [selectedDate, dispatch]);
@@ -75,6 +76,29 @@ export default function DiaryScreen() {
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);
+  };
+
+  const renderItemContent = (section, item, isDarkMode) => {
+    if (section === "Activity") {
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <FontAwesome5 name={item.icon} size={30} color={isDarkMode ? 'white' : 'black'} />
+          <Text style={{ color: isDarkMode ? 'white' : 'black', fontSize: 12 }}>{item.name}</Text>
+        </View>
+      );
+    } else if (item.image_url) {
+      return (
+        <Image
+          source={{ uri: item.image_url }}
+          style={styles.foodImage}
+          onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
+        />
+      );
+    } else {
+      return (
+        <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{item.name}</Text>
+      );
+    }
   };
 
   const backgroundColor = isDarkMode ? '#121212' : '#fff';
@@ -129,24 +153,16 @@ export default function DiaryScreen() {
 
                 <View style={styles.dataContainer}>
                   {selectedDateSectionsData[section].map((item, idx) => (
-                    <TouchableOpacity 
-                      key={idx} 
-                      style={styles.dataItem} 
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.dataItem}
                       onLongPress={() => {
                         setSelectedItem(item);
                         setSelectedSection(section);
                         setModalVisible(true);
                       }}
                     >
-                      {item.image_url ? (
-                        <Image 
-                          source={{ uri: item.image_url }} 
-                          style={styles.foodImage} 
-                          onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
-                        />
-                      ) : (
-                        <Text style={{ color: textColor }}>{item.name}</Text>
-                      )}
+                      {renderItemContent(section, item, isDarkMode)}
                     </TouchableOpacity>
                   ))}
 
@@ -166,7 +182,7 @@ export default function DiaryScreen() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
-              Do you want to delete "{selectedItem}"?
+              Do you want to delete "{selectedItem?.name}"?
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
@@ -183,7 +199,6 @@ export default function DiaryScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingBottom: 20 },
   calendarWrapper: { height: height * 0.4, justifyContent: 'center', alignItems: 'center' },
@@ -196,8 +211,8 @@ const styles = StyleSheet.create({
   dataItem: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   plusButton: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center' },
   plus: { fontSize: 30, fontWeight: 'bold' },
-  modalContent: { 
-    width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' 
+  modalContent: {
+    width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center'
   },
   modalButtons: { flexDirection: 'row', marginTop: 10 },
   modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },

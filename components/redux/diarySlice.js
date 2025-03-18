@@ -77,7 +77,8 @@ export const addItemToSelectedDate = createAsyncThunk(
       proteins: item.proteins_100g,
       sugars: item.sugars_100g,
       fiber: item.fiber,
-      image_url: item.image_url
+      image_url: item.image_url,
+      icon: item.icon // ✅ Thêm icon vào newItem
     };
 
     // console.log("✅ Item to be saved:", newItem);
