@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView, Image } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } from '@/components/redux/diarySlice';
@@ -18,17 +18,42 @@ export default function HomeScreen() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const productData = route.params?.product ? JSON.parse(route.params.product) : null;
-  console.log("Received productData to Index:", productData);
+  const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
+
+  
   useEffect(() => {
     dispatch(loadTodaySectionsData());
   }, [dispatch]);
 
   useEffect(() => {
-    if (route.params?.selectedItem && route.params?.section) {
-      dispatch(addItemToSelectedDate({ section: route.params.section, item: route.params.selectedItem }));
+    if (route.params?.product && !selectedItem) {
+      const productData = JSON.parse(route.params.product);
+      console.log("🆕 New product scanned:", productData);
+  
+      // Chờ 300ms trước khi cập nhật state, tránh lỗi Fragment
+      setTimeout(() => {
+        setSelectedItem(productData);
+        setMealSelectionVisible(true);
+      }, 300);
     }
-  }, [route.params, dispatch]);
+  }, [route.params]);
+  
+  const handleMealSelection = (meal) => {
+    if (selectedItem) {
+      console.log(`📌 Adding item to Redux: ${JSON.stringify(selectedItem)}`);
+      dispatch(addItemToSelectedDate({ section: meal, item: selectedItem }));
+    }
+  
+    // Đóng modal trước khi reset state
+    setMealSelectionVisible(false);
+  
+    // Đợi 500ms để tránh lỗi Fragment chưa gắn vào UI
+    setTimeout(() => {
+      console.log("✅ Item added successfully. Resetting productData...");
+      setSelectedItem(null);
+      navigation.setParams({ product: null });
+    }, 500);
+  };
 
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
@@ -65,18 +90,23 @@ export default function HomeScreen() {
                     setModalVisible(true);
                   }}
                 >
-                  <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{item}</Text>
+                  {item.image_url ? (
+                    <Image 
+                      source={{ uri: item.image_url }} 
+                      style={styles.foodImage} 
+                      onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
+                    />
+                  ) : (
+                    <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{item.name}</Text>
+                  )}
                 </TouchableOpacity>
               ))}
 
-              {/* Nếu có dưới 3 mục thì hiển thị nút thêm */}
+              {/* Nếu có dưới 3 mục thì hiển thị nút thêm và di chuyển sang phải */}
               {todaySelection[section].length < 3 && (
                 <TouchableOpacity 
-                  style={styles.dataItem} 
-                  onPress={() => {
-                    console.log("Navigating to:", section); // Check if "Activity" is passed
-                    navigation.navigate(section === "Activity" ? "Data" : "Search", { section });
-                  }}
+                  style={[styles.dataItem, styles.addButton]} 
+                  onPress={() => navigation.navigate(section === "Activity" ? "Data" : "Search", { section })}
                 >
                   <Text style={[styles.plus, { color: isDarkMode ? 'white' : 'black' }]}>+</Text>
                 </TouchableOpacity>
@@ -90,18 +120,39 @@ export default function HomeScreen() {
         <FontAwesome5 name="camera" size={24} color="white" />
       </TouchableOpacity>
 
+      {/* Modal chọn bữa ăn */}
+      <Modal animationType="slide" transparent={true} visible={mealSelectionVisible}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
+              Chọn bữa ăn cho "{selectedItem?.name}"
+            </Text>
+            {["Breakfast", "Lunch", "Dinner", "Snack"].map((meal) => (
+              <TouchableOpacity 
+                key={meal} 
+                style={styles.modalButton} 
+                onPress={() => handleMealSelection(meal)}
+              >
+                <Text style={{ color: 'black' }}>{meal}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal xác nhận xóa */}
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
-              Do you want to delete "{selectedItem}"?
+              Do you want to delete "{selectedItem?.name}"?
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
-                <Text style={{ color: 'black' }}>Cancel</Text>
+                <Text style={{ color: 'black' }}>Cancel </Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
-                <Text style={{ color: 'white' }}>Delete</Text>
+                <Text style={{ color: 'white' }}>Delete </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -129,8 +180,7 @@ const styles = StyleSheet.create({
   modalContent: { 
     width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' 
   },
-  modalButtons: { flexDirection: 'row', marginTop: 10 },
-  modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
+  modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80, backgroundColor: '#ddd' },
   cameraButton: {
     position: 'absolute',
     bottom: 20,
@@ -141,10 +191,12 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    elevation: 5
   },
+  foodImage: {
+    width: 75,
+    height: 75,
+    borderRadius: 10,
+    resizeMode: 'cover'
+  }
 });

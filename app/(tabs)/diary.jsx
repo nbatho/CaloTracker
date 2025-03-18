@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { 
   View, Text, ActivityIndicator, Platform, StyleSheet, 
   useColorScheme, Dimensions, TouchableOpacity, ScrollView, 
-  KeyboardAvoidingView, Modal 
+  KeyboardAvoidingView, Modal , Image
 } from 'react-native';
 import { useDispatch, useSelector, Provider } from 'react-redux';
 import { deleteItemFromSection, loadSelectedDateSectionsData } from '@/components/redux/diarySlice';
@@ -35,21 +35,20 @@ export default function DiaryScreen() {
       const checkAndUpdateDate = async () => {
         const storedDate = await AsyncStorage.getItem('selectedDate');
         const today = getTodayDate();
-
+  
         if (route.params?.fromSearch) {
-          // 🔹 Nếu từ `Search` về thì giữ nguyên ngày đã chọn
           console.log("Trở về từ Search, giữ nguyên ngày:", storedDate);
           return;
-        } 
-        
-        // 🔹 Nếu chuyển từ tab khác thì reset về hôm nay
-        console.log("Chuyển từ tab khác, reset về hôm nay");
-        setSelectedDate(today);
-        await AsyncStorage.setItem('selectedDate', today);
-
-        dispatch(loadSelectedDateSectionsData());
+        }
+  
+        if (storedDate !== today) {
+          console.log("Chuyển từ tab khác, reset về hôm nay");
+          setSelectedDate(today);
+          await AsyncStorage.setItem('selectedDate', today);
+          dispatch(loadSelectedDateSectionsData()); // Chỉ gọi khi ngày thay đổi
+        }
       };
-
+  
       checkAndUpdateDate();
     }, [dispatch, route.params])
   );
@@ -139,7 +138,15 @@ export default function DiaryScreen() {
                         setModalVisible(true);
                       }}
                     >
-                      <Text style={{ color: textColor }}>{item}</Text>
+                      {item.image_url ? (
+                        <Image 
+                          source={{ uri: item.image_url }} 
+                          style={styles.foodImage} 
+                          onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
+                        />
+                      ) : (
+                        <Text style={{ color: textColor }}>{item.name}</Text>
+                      )}
                     </TouchableOpacity>
                   ))}
 
@@ -189,6 +196,17 @@ const styles = StyleSheet.create({
   dataItem: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   plusButton: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center' },
   plus: { fontSize: 30, fontWeight: 'bold' },
+  modalContent: { 
+    width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' 
+  },
+  modalButtons: { flexDirection: 'row', marginTop: 10 },
+  modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
+  foodImage: {
+    width: 75,
+    height: 75,
+    borderRadius: 10,
+    resizeMode: 'cover'
+  }
 });
 
 export function WrappedDiaryScreen() {

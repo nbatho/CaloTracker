@@ -39,7 +39,7 @@ const SearchScreen = () => {
             onChangeText={setSearchQuery}
           />
           {/* Nút mở Camera */}
-          <TouchableOpacity onPress={() => navigation.navigate("Camera")}> 
+          <TouchableOpacity onPress={() => navigation.replace("Camera")}> 
             <Ionicons name="barcode" size={24} color="#888" style={styles.barcodeIcon} />
           </TouchableOpacity>
         </View>
