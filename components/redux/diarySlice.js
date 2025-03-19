@@ -78,7 +78,8 @@ export const addItemToSelectedDate = createAsyncThunk(
       sugars: item.sugars_100g,
       fiber: item.fiber,
       image_url: item.image_url,
-      icon: item.icon // ✅ Thêm icon vào newItem
+      icon: item.icon, // ✅ Thêm icon vào newItem
+      quantity: item.quantity
     };
 
     // console.log("✅ Item to be saved:", newItem);

@@ -30,12 +30,12 @@ const CameraScreen = () => {
   
       if (data.status === 1) {
         const productData = {
-          name: data.product.product_name || "No English name available",
+          name: data.product.product_name_en || "No English name available",
           energy: (data.product.nutriments?.["energy-kcal"] || 0.0).toFixed(1),
           energy_100g: (data.product.nutriments?.["energy-kcal_100g"] || 0.0).toFixed(1),
           proteins_100g: (data.product.nutriments?.proteins_100g || 0.0).toFixed(1),
           proteins: (data.product.nutriments?.proteins || 0.0).toFixed(1),
-          
+          quantity: data.product.quantity || "Unknown",
           carbohydrates_100g: (data.product.nutriments?.carbohydrates_100g || 0.0).toFixed(1),
           carbohydrates: (data.product.nutriments?.carbohydrates || 0.0).toFixed(1),
           fat: (data.product.nutriments?.fat || 0.0).toFixed(1),

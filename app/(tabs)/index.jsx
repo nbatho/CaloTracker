@@ -64,7 +64,7 @@ export default function HomeScreen() {
     const renderItemContent = (section, item, isDarkMode) => {
         console.log("renderItemContent:", { section, item, isDarkMode }); // ✅ Log các props
         if (section === "Activity") {
-            console.log("Activity item:", item); // ✅ Log item nếu là Activity
+            // console.log("Activity item:", item); // ✅ Log item nếu là Activity
             return (
                 <View style={{ alignItems: 'center' }}>
                     <FontAwesome5 name={item.icon} size={30} color={isDarkMode ? 'white' : 'black'} />
@@ -73,11 +73,22 @@ export default function HomeScreen() {
             );
         } else if (item.image_url) {
             return (
-                <Image
-                    source={{ uri: item.image_url }}
-                    style={styles.foodImage}
-                    onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
-                />
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={{ uri: item.image_url }}
+                        style={styles.foodImage}
+                        onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
+                    />
+                    <View style={styles.overlay}>
+                        <Text style={styles.overlayText}>{item.energy} kcal</Text>
+                        <Text style={styles.overlayText}>
+                            {item.name.length > 10 ? item.name.slice(0, 10) + "…" : item.name}
+                        </Text>
+                        <Text style={styles.overlayText}>
+                            {item.quantity}
+                        </Text>
+                    </View>
+                </View>
             );
         } else {
             return (
@@ -91,6 +102,18 @@ export default function HomeScreen() {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={{ marginBottom: 20 }}>
                     <RingProgress progress={100} size={200} strokeWidth={15} kcalLeft={2137} />
+                </View>
+
+                 {/* Nutrition Stats */}
+                <View style={styles.nutritionContainer}>
+                {["Carbs", "Fat", "Protein"].map((nutrient, index) => (
+                    <View key={index} style={styles.nutritionItem}>
+                    <RingProgress progress={0} size={30} strokeWidth={8} />
+                    <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
+                        0/320 g {nutrient.toLowerCase()}
+                    </Text>
+                    </View>
+                ))}
                 </View>
 
                 {Object.keys(todaySelection).map((section, index) => (
@@ -227,4 +250,44 @@ const styles = StyleSheet.create({
     activityName: {
         textAlign: 'center',
     },
+    imageContainer: {
+        position: 'relative',
+        width: 80, // Điều chỉnh kích thước ảnh
+        height: 80,
+        borderRadius: 10,
+        overflow: 'hidden', // Đảm bảo overlay không bị tràn ra ngoài
+    },
+    overlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Lớp mờ
+        paddingVertical: 3,
+        padding: 3,
+        paddingBottom: 5
+        // alignItems: 'center',
+    },
+    
+    overlayText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    nutritionContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    nutritionItem: {
+        flexDirection: 'row',  
+        alignItems: 'center',   
+        padding: 5,
+    },
+    nutritionText: {
+        marginLeft: 5, 
+        fontSize: 14,
+        fontWeight: '500',
+    }
 });
