@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } from '@/components/redux/diarySlice';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RingProgress from '../../components/RingProgress';
-
+import ArcProgress from '../../components/ArcProgress';
 export default function HomeScreen() {
     const dispatch = useDispatch();
     const navigation = useNavigation();
@@ -101,20 +101,24 @@ export default function HomeScreen() {
         <View style={[styles.container, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F5F5F5' }]}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={{ marginBottom: 20 }}>
-                    <RingProgress progress={100} size={200} strokeWidth={15} kcalLeft={2137} />
+                    <ArcProgress progress={1000}  size={200} kcalLeft={2147} strokeWidth={15} />
                 </View>
 
                  {/* Nutrition Stats */}
-                <View style={styles.nutritionContainer}>
-                {["Carbs", "Fat", "Protein"].map((nutrient, index) => (
-                    <View key={index} style={styles.nutritionItem}>
-                    <RingProgress progress={0} size={30} strokeWidth={8} />
-                    <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
-                        0/320 g {nutrient.toLowerCase()}
-                    </Text>
+                 <View style={styles.nutritionContainer}>
+                    {[
+                        { name: "Carbs", progress: 100, max: 200 },
+                        { name: "Fat", progress: 21, max: 70 },
+                        { name: "Protein", progress: 105, max: 150 }
+                    ].map((nutrient, index) => (
+                        <View key={index} style={styles.nutritionItem}>
+                        <RingProgress progress={(nutrient.progress / nutrient.max) * 100} size={40} strokeWidth={6} />
+                        <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
+                            {nutrient.progress}/{nutrient.max} g {nutrient.name.toLowerCase()}
+                        </Text>
+                        </View>
+                    ))}
                     </View>
-                ))}
-                </View>
 
                 {Object.keys(todaySelection).map((section, index) => (
                     <View key={index} style={styles.section}>
