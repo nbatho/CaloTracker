@@ -36,7 +36,7 @@ const MealDetailScreen = () => {
       <Text style={[styles.title, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{productData.name}</Text>
       {productData.image_url && <Image source={{ uri: productData.image_url }} style={styles.image} />}
       <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
-        Calories: {productData.energy || '0.0'} kcal/ 75g
+        Calories: {productData.energy || '0.0'} kcal/ {productData.quantity}
       </Text>
       <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Fat: {productData.fat || '0.0'} g</Text>
       <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
