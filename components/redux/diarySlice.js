@@ -84,10 +84,7 @@ export const addItemToSelectedDate = createAsyncThunk(
     // console.log("✅ Item to be saved:", newItem);
 
     // Kiểm tra xem item đã tồn tại chưa, tránh thêm trùng lặp
-    const sectionData = allSectionsData[selectedDate][section] || [];
-    const isDuplicate = sectionData.some(existingItem => existingItem.name === newItem.name);
-    
-    if (!isDuplicate) {
+    const sectionData = allSectionsData[selectedDate][section] || [];    
       allSectionsData[selectedDate][section].push(newItem);
       await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
 
@@ -98,9 +95,7 @@ export const addItemToSelectedDate = createAsyncThunk(
       if (selectedDate === getTodayDate() && state.diary.todaySectionsData !== allSectionsData[selectedDate]) {
         dispatch(loadTodaySectionsData());
       }
-    } else {
-      console.log("⚠️ Duplicate item, not adding again.");
-    }
+
   }
 );
 

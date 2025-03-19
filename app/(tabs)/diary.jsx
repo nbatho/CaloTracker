@@ -36,12 +36,12 @@ export default function DiaryScreen() {
       const checkAndUpdateDate = async () => {
         const storedDate = await AsyncStorage.getItem('selectedDate');
         const today = getTodayDate();
-
+  
         if (route.params?.fromSearch) {
           console.log("Trở về từ Search, giữ nguyên ngày:", storedDate);
           return;
         }
-
+  
         if (storedDate !== today) {
           console.log("Chuyển từ tab khác, reset về hôm nay");
           setSelectedDate(today);
@@ -49,7 +49,7 @@ export default function DiaryScreen() {
           dispatch(loadSelectedDateSectionsData()); // Chỉ gọi khi ngày thay đổi
         }
       };
-
+  
       checkAndUpdateDate();
     }, [dispatch, route.params])
   );
@@ -152,24 +152,26 @@ export default function DiaryScreen() {
                 </Text>
 
                 <View style={styles.dataContainer}>
-                  {selectedDateSectionsData[section].map((item, idx) => (
-                    <TouchableOpacity
-                      key={idx}
-                      style={styles.dataItem}
-                      onLongPress={() => {
-                        setSelectedItem(item);
-                        setSelectedSection(section);
-                        setModalVisible(true);
-                      }}
-                    >
-                      {renderItemContent(section, item, isDarkMode)}
-                    </TouchableOpacity>
-                  ))}
-
-                  {selectedDateSectionsData[section].length < 3 && (
-                    <TouchableOpacity style={styles.plusButton} onPress={() => handleAddItem(section)}>
-                      <Text style={[styles.plus, { color: textColor }]}>+</Text>
-                    </TouchableOpacity>
+                  {selectedDateSectionsData[section].length > 0 ? (
+                    selectedDateSectionsData[section].map((item, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        style={styles.dataItem}
+                        onLongPress={() => {
+                          setSelectedItem(item);
+                          setSelectedSection(section);
+                          setModalVisible(true);
+                        }}
+                      >
+                        {renderItemContent(section, item, isDarkMode)}
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <View style={styles.dataItem}>
+                    <Text style={[styles.noDataText, { color: isDarkMode ? 'white' : 'black' }]}>
+                      No Data
+                    </Text>
+                  </View>
                   )}
                 </View>
               </View>
@@ -214,6 +216,10 @@ const styles = StyleSheet.create({
   modalContent: {
     width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center'
   },
+  modalContainer: {
+    flex: 1, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
   modalButtons: { flexDirection: 'row', marginTop: 10 },
   modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
   foodImage: {
@@ -221,7 +227,12 @@ const styles = StyleSheet.create({
     height: 75,
     borderRadius: 10,
     resizeMode: 'cover'
-  }
+  },
+  noDataText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });
 
 export function WrappedDiaryScreen() {
