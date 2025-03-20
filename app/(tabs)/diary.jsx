@@ -10,7 +10,7 @@ import { deleteItemFromSection, loadSelectedDateSectionsData } from '@/component
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, useNavigationState  } from '@react-navigation/native';
 import store from '@/components/redux/store';
 
 const { height, width } = Dimensions.get('window');
@@ -30,37 +30,37 @@ export default function DiaryScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
+  const navigationState = useNavigationState((state) => state);
+  useEffect(() => {
+    if (!navigationState) return;
 
+    const currentRoute = navigationState.routes[navigationState.index].name;
+    if (currentRoute !== "Diary") {
+      console.log("📌 Rời khỏi Diary, reset về ngày hôm nay");
+      setSelectedDate(getTodayDate());
+      AsyncStorage.setItem('selectedDate', getTodayDate());
+    }
+  }, [navigationState]);
+
+  // Khi Diary được focus -> Tải dữ liệu ngày hiện tại
   useFocusEffect(
     useCallback(() => {
-      const checkAndUpdateDate = async () => {
-        const storedDate = await AsyncStorage.getItem('selectedDate');
+      const loadDiaryData = async () => {
         const today = getTodayDate();
-  
-        if (route.params?.fromSearch) {
-          console.log("Trở về từ Search, giữ nguyên ngày:", storedDate);
-          return;
-        }
-  
+        const storedDate = await AsyncStorage.getItem('selectedDate');
+
         if (storedDate !== today) {
-          console.log("Chuyển từ tab khác, reset về hôm nay");
+          console.log("🔄 Diary được mở, cập nhật ngày hiện tại");
           setSelectedDate(today);
           await AsyncStorage.setItem('selectedDate', today);
-          dispatch(loadSelectedDateSectionsData()); // Chỉ gọi khi ngày thay đổi
         }
-      };
-  
-      checkAndUpdateDate();
-    }, [dispatch, route.params])
-  );
 
-  useEffect(() => {
-    const updateStoredDate = async () => {
-      await AsyncStorage.setItem('selectedDate', selectedDate);
-      dispatch(loadSelectedDateSectionsData());
-    };
-    updateStoredDate();
-  }, [selectedDate, dispatch]);
+        dispatch(loadSelectedDateSectionsData());
+      };
+
+      loadDiaryData();
+    }, [dispatch])
+  );
 
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
