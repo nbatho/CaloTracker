@@ -25,12 +25,12 @@ const CameraScreen = () => {
     setScanning(false);
     
     try {
-      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json?lc=en`);
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
       const data = await response.json();
   
       if (data.status === 1) {
         const productData = {
-          name: data.product.product_name_en || "No English name available",
+          name: data.product.product_name || "No English name available",
           energy: (data.product.nutriments?.["energy-kcal"] || 0.0).toFixed(1),
           energy_100g: (data.product.nutriments?.["energy-kcal_100g"] || 0.0).toFixed(1),
           proteins_100g: (data.product.nutriments?.proteins_100g || 0.0).toFixed(1),

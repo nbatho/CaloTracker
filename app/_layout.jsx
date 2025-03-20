@@ -6,12 +6,13 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { Provider } from 'react-redux';  
+import { Provider, useDispatch } from 'react-redux';  
 import store from '../components/redux/store';
+import { loadTotalNutrients } from '../components/redux/diarySlice';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { View, StyleSheet } from 'react-native';
-// import CameraScreen from '../app/camera';
+
 SplashScreen.preventAutoHideAsync();
 
 const LightTheme = {
@@ -22,13 +23,17 @@ const LightTheme = {
   },
 };
 
-export default function RootLayout() {
+// 🆕 Tạo component riêng để dùng dispatch
+function AppContent() {
+  const dispatch = useDispatch();
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   useEffect(() => {
+    dispatch(loadTotalNutrients()); // 🚀 Load totalNutrients khi app khởi động
+
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -39,17 +44,23 @@ export default function RootLayout() {
   }
 
   return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+      <View style={styles.container}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="setting" options={{ title: "Settings" }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </View>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <Provider store={store}> 
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-        <View style={styles.container}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="setting" options={{ title: "Settings" }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </View>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <AppContent />
     </Provider>
   );
 }

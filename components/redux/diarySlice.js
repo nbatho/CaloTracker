@@ -24,10 +24,7 @@ export const loadTodaySectionsData = createAsyncThunk(
 
     if (!allSectionsData[today]) {
       allSectionsData[today] = { Activity: [], Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
-      await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
     }
-
-    // console.log("📦 Loaded from AsyncStorage:", allSectionsData[today]); // 🛠 Kiểm tra dữ liệu trước khi trả về
 
     return allSectionsData[today];
   }
@@ -43,7 +40,6 @@ export const loadSelectedDateSectionsData = createAsyncThunk(
 
     if (!allSectionsData[selectedDate]) {
       allSectionsData[selectedDate] = { Activity: [], Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
-      await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
     }
 
     return allSectionsData[selectedDate];
@@ -54,12 +50,7 @@ export const loadSelectedDateSectionsData = createAsyncThunk(
 export const addItemToSelectedDate = createAsyncThunk(
   'diary/addItemToSelectedDate',
   async ({ section, item }, { dispatch, getState }) => {
-    // console.log("📥 Received in Redux (addItemToSelectedDate):", item);
-
-    if (!item || !item.name) {
-      console.log("❌ Invalid item:", item);
-      return;
-    }
+    if (!item || !item.name) return;
 
     const selectedDate = await AsyncStorage.getItem('selectedDate');
     let allSectionsData = await AsyncStorage.getItem('allSectionsData');
@@ -71,32 +62,38 @@ export const addItemToSelectedDate = createAsyncThunk(
 
     const newItem = {
       name: item.name,
-      carbohydrates: item.carbohydrates_100g,
-      energy: item.energy_100g,
-      fat: item.fat_100g,
-      proteins: item.proteins_100g,
-      sugars: item.sugars_100g,
-      fiber: item.fiber,
+      carbohydrates: (parseFloat(item.carbohydrates_100g) || 0) * (parseFloat(item.quantity) / 100 || 1),
+      energy: (parseFloat(item.energy_100g) || 0) * (parseFloat(item.quantity) / 100 || 1),
+      fat: (parseFloat(item.fat_100g) || 0) * (parseFloat(item.quantity) / 100 || 1),
+      proteins: (parseFloat(item.proteins_100g) || 0) * (parseFloat(item.quantity) / 100 || 1),
+      sugars: item.sugars_100g * (item.quantity / 100),
+      fiber: item.fiber ? item.fiber * (item.quantity / 100) : 0,
       image_url: item.image_url,
-      icon: item.icon, // ✅ Thêm icon vào newItem
+      icon: item.icon,
       quantity: item.quantity
     };
+    console.log("🆕 Item added:", newItem);
+    allSectionsData[selectedDate][section].push(newItem);
 
-    // console.log("✅ Item to be saved:", newItem);
+    // ✅ Tính tổng Carbs, Fat, Protein sau khi thêm thực phẩm
+    const totalNutrients = Object.values(allSectionsData[selectedDate])
+      .flat()
+      .reduce((totals, foodItem) => ({
+        carbohydrates: totals.carbohydrates + (foodItem.carbohydrates || 0),
+        energy: totals.energy + (parseFloat(foodItem.energy) || 0),
+        fat: totals.fat + (foodItem.fat || 0),
+        proteins: totals.proteins + (foodItem.proteins || 0),
+      }), { carbohydrates: 0, fat: 0, proteins: 0, energy:0 });
+    // ✅ Lưu vào AsyncStorage
+    await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+    await AsyncStorage.setItem('totalNutrients', JSON.stringify(totalNutrients));
 
-    // Kiểm tra xem item đã tồn tại chưa, tránh thêm trùng lặp
-    const sectionData = allSectionsData[selectedDate][section] || [];    
-      allSectionsData[selectedDate][section].push(newItem);
-      await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+    dispatch(loadSelectedDateSectionsData());
+    dispatch(updateTotalNutrients(totalNutrients));
 
-      dispatch(loadSelectedDateSectionsData());
-
-      // Chỉ gọi `loadTodaySectionsData()` nếu thực sự cần thiết
-      const state = getState();
-      if (selectedDate === getTodayDate() && state.diary.todaySectionsData !== allSectionsData[selectedDate]) {
-        dispatch(loadTodaySectionsData());
-      }
-
+    if (selectedDate === getTodayDate()) {
+      dispatch(loadTodaySectionsData());
+    }
   }
 );
 
@@ -108,18 +105,44 @@ export const deleteItemFromSection = createAsyncThunk(
     let allSectionsData = await AsyncStorage.getItem('allSectionsData');
     allSectionsData = allSectionsData ? JSON.parse(allSectionsData) : {};
 
-    if (allSectionsData[selectedDate]) {
-      const index = allSectionsData[selectedDate][section].findIndex(i => i.name === item.name);
+    if (allSectionsData[selectedDate] && allSectionsData[selectedDate][section]) {
+      const index = allSectionsData[selectedDate][section].findIndex(
+        i => i.name === item.name && i.quantity === item.quantity
+      );
+
       if (index !== -1) {
-        allSectionsData[selectedDate][section].splice(index, 1);
-        await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
-        dispatch(loadSelectedDateSectionsData()); // 🔥 Load lại dữ liệu sau khi xóa
-        if (selectedDate === getTodayDate()) dispatch(loadTodaySectionsData());
+        allSectionsData[selectedDate][section].splice(index, 1); // ❌ Chỉ xóa 1 item
+      }
+
+      // ✅ Tính lại tổng sau khi xóa
+      const totalNutrients = Object.values(allSectionsData[selectedDate])
+        .flat()
+        .reduce((totals, foodItem) => ({
+          carbohydrates: totals.carbohydrates + (foodItem.carbohydrates || 0),
+          energy: totals.energy + (parseFloat(foodItem.energy) || 0),
+          fat: totals.fat + (foodItem.fat || 0),
+          proteins: totals.proteins + (foodItem.proteins || 0),
+        }), { carbohydrates: 0, fat: 0, proteins: 0, energy:0 });
+
+      await AsyncStorage.setItem('allSectionsData', JSON.stringify(allSectionsData));
+      await AsyncStorage.setItem('totalNutrients', JSON.stringify(totalNutrients));
+
+      dispatch(loadSelectedDateSectionsData());
+      dispatch(updateTotalNutrients(totalNutrients));
+
+      if (selectedDate === getTodayDate()) {
+        dispatch(loadTodaySectionsData());
       }
     }
   }
 );
-
+export const loadTotalNutrients = createAsyncThunk(
+  'diary/loadTotalNutrients',
+  async () => {
+    const storedNutrients = await AsyncStorage.getItem('totalNutrients');
+    return storedNutrients ? JSON.parse(storedNutrients) : { carbohydrates: 0, fat: 0, proteins: 0, energy:0 };
+  }
+);
 // 🎯 Redux Slice
 const diarySlice = createSlice({
   name: 'diary',
@@ -140,21 +163,24 @@ const diarySlice = createSlice({
       Lunch: [],
       Dinner: [],
       Snack: []
+    },
+    totalNutrients: { carbohydrates: 0, fat: 0, proteins: 0 , energy:0 }
+  },
+  reducers: {
+    updateTotalNutrients: (state, action) => {
+      state.totalNutrients = action.payload;
     }
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(loadTotalNutrients.fulfilled, (state, action) => {
+        state.totalNutrients = action.payload;
+      })
       .addCase(loadCalendars.fulfilled, (state, action) => {
         state.calendars = action.payload;
       })
       .addCase(loadTodaySectionsData.fulfilled, (state, action) => {
-        if (JSON.stringify(state.todaySectionsData) !== JSON.stringify(action.payload)) {
-          console.log("📌 Redux todaySectionsData updated:", action.payload);
-          state.todaySectionsData = action.payload;
-        } else {
-          console.log("⏳ No update needed, data unchanged.");
-        }
+        state.todaySectionsData = action.payload;
       })
       .addCase(loadSelectedDateSectionsData.fulfilled, (state, action) => {
         state.selectedDateSectionsData = action.payload;
@@ -162,7 +188,8 @@ const diarySlice = createSlice({
       .addCase(deleteItemFromSection.fulfilled, (state) => {
         state.loading = false;
       });
-  },
+  }
 });
 
+export const { updateTotalNutrients } = diarySlice.actions;
 export default diarySlice.reducer;

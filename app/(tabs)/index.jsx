@@ -15,22 +15,28 @@ export default function HomeScreen() {
     const isDarkMode = theme === 'dark';
 
     const todaySelection = useSelector(state => state.diary.todaySectionsData);
+    const totalNutrients = useSelector(state => state.diary.totalNutrients);
 
     const [selectedItem, setSelectedItem] = useState(null);
+    
     const [selectedSection, setSelectedSection] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
 
+    const TOTAL_KCAL = 2147; 
+    
+    console.log(totalNutrients)
 
     useEffect(() => {
         dispatch(loadTodaySectionsData());
     }, [dispatch]);
+    useEffect(() => {
+        dispatch(loadTodaySectionsData()); 
+      }, [totalNutrients]);
 
     useEffect(() => {
         if (route.params?.product && !selectedItem) {
             const productData = JSON.parse(route.params.product);
-            console.log("🆕 New product scanned:", productData);
-
             // Chờ 300ms trước khi cập nhật state, tránh lỗi Fragment
             setTimeout(() => {
                 setSelectedItem(productData);
@@ -41,7 +47,7 @@ export default function HomeScreen() {
 
     const handleMealSelection = (meal) => {
         if (selectedItem) {
-            console.log(`📌 Adding item to Redux: ${JSON.stringify(selectedItem)}`);
+            // console.log(` Adding item to Redux: ${JSON.stringify(selectedItem)}`);
             dispatch(addItemToSelectedDate({ section: meal, item: selectedItem }));
         }
 
@@ -50,7 +56,7 @@ export default function HomeScreen() {
 
         // Đợi 500ms để tránh lỗi Fragment chưa gắn vào UI
         setTimeout(() => {
-            console.log("✅ Item added successfully. Resetting productData...");
+            // console.log("✅ Item added successfully. Resetting productData...");
             setSelectedItem(null);
             navigation.setParams({ product: null });
         }, 500);
@@ -62,9 +68,7 @@ export default function HomeScreen() {
     };
 
     const renderItemContent = (section, item, isDarkMode) => {
-        console.log("renderItemContent:", { section, item, isDarkMode }); // ✅ Log các props
         if (section === "Activity") {
-            // console.log("Activity item:", item); // ✅ Log item nếu là Activity
             return (
                 <View style={{ alignItems: 'center' }}>
                     <FontAwesome5 name={item.icon} size={30} color={isDarkMode ? 'white' : 'black'} />
@@ -101,24 +105,34 @@ export default function HomeScreen() {
         <View style={[styles.container, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F5F5F5' }]}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={{ marginBottom: 20 }}>
-                    <ArcProgress progress={1000}  size={200} kcalLeft={2147} strokeWidth={15} />
+                    <ArcProgress progress={ Math.min((totalNutrients.energy / TOTAL_KCAL) * 100, 100) }  size={200} kcalLeft={Math.floor(2147 - Math.min((totalNutrients.energy / TOTAL_KCAL) * 100, 100))} strokeWidth={15} />
                 </View>
 
                  {/* Nutrition Stats */}
                  <View style={styles.nutritionContainer}>
                     {[
-                        { name: "Carbs", progress: 100, max: 200 },
-                        { name: "Fat", progress: 21, max: 70 },
-                        { name: "Protein", progress: 105, max: 150 }
+                        { name: "Carbs", progress: Math.round(totalNutrients.carbohydrates), max: 200 },
+                        { name: "Fat", progress: Math.round(totalNutrients.fat), max: 70 },
+                        { name: "Protein", progress: Math.round(totalNutrients.proteins), max: 150 }
                     ].map((nutrient, index) => (
                         <View key={index} style={styles.nutritionItem}>
-                        <RingProgress progress={(nutrient.progress / nutrient.max) * 100} size={40} strokeWidth={6} />
-                        <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
-                            {nutrient.progress}/{nutrient.max} g {nutrient.name.toLowerCase()}
-                        </Text>
+                            <RingProgress 
+                                progress={Math.round((nutrient.progress / nutrient.max) * 100)}  
+                                size={25} 
+                                strokeWidth={6} 
+                            />
+                            <View style={styles.nutritionInfo}>
+                                <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
+                                    {nutrient.progress}/{nutrient.max} g
+                                </Text>
+                                <Text style={[styles.nutritionLabel, { color: isDarkMode ? 'gray' : 'black' }]}>
+                                    {nutrient.name}
+                                </Text>
+                            </View>
                         </View>
                     ))}
-                    </View>
+                </View>
+
 
                 {Object.keys(todaySelection).map((section, index) => (
                     <View key={index} style={styles.section}>
@@ -199,7 +213,7 @@ export default function HomeScreen() {
                         <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
                             Do you want to delete "{selectedItem?.name}"?
                         </Text>
-                        <View style={styles.modalButtons}>
+                        <View>
                             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
                                 <Text style={{ color: 'black' }}>Cancel </Text>
                             </TouchableOpacity>
@@ -279,19 +293,28 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     nutritionContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: 'row', // Xếp thành hàng ngang
+        justifyContent: 'space-around', // Giãn cách đều giữa các nhóm
         alignItems: 'center',
-        marginTop: 10,
+        marginVertical: 10,
     },
     nutritionItem: {
-        flexDirection: 'row',  
-        alignItems: 'center',   
-        padding: 5,
+        flexDirection: 'row', // Xếp vòng tròn và text theo hàng ngang
+        alignItems: 'center', // Căn giữa theo chiều dọc
+        marginHorizontal: 10,
+    },
+    nutritionInfo: {
+        marginLeft: 12, // Tăng khoảng cách giữa RingProgress và text
+        alignItems: 'flex-start', // Căn text sang trái
     },
     nutritionText: {
-        marginLeft: 5, 
         fontSize: 14,
-        fontWeight: '500',
-    }
+        fontWeight: 'bold',
+    },
+    nutritionLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        textTransform: 'capitalize',
+        marginTop: 2, // Khoảng cách với số liệu progress
+    },
 });
