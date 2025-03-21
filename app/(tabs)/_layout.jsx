@@ -65,7 +65,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Data"
+        name="Graph"
         options={{
           title: '',
           tabBarIcon: ({ color }) => <Entypo name="bar-graph" size={24} color={color} />,
@@ -80,7 +80,7 @@ export default function TabLayout() {
                   color: Colors[colorScheme ?? 'light'].text,
                 }}
               >
-                Data
+                Graph
               </Text>
             </View>
           ),

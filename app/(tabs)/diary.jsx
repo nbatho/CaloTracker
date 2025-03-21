@@ -62,17 +62,12 @@ export default function DiaryScreen() {
     }, [dispatch])
   );
 
-  const handleDayPress = (day) => {
+  const handleDayPress = async (day) => {
     setSelectedDate(day.dateString);
+    await AsyncStorage.setItem('selectedDate', day.dateString);
+    dispatch(loadSelectedDateSectionsData());
   };
 
-  const handleAddItem = (section) => {
-    if (section === "Activity") {
-      navigation.navigate("Data"); // Chuyển hướng đến màn hình AI nếu là Activity
-    } else {
-      navigation.navigate("Search", { section, selectedDate, fromDiary: true });
-    }
-  };
   const deleteItem = () => {
     dispatch(deleteItemFromSection({ section: selectedSection, item: selectedItem }));
     setModalVisible(false);

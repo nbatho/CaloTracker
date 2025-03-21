@@ -8,13 +8,25 @@ import 'react-native-reanimated';
 
 import { Provider, useDispatch } from 'react-redux';  
 import store from '../components/redux/store';
-import { loadTotalNutrients } from '../components/redux/diarySlice';
+import { loadTotalNutrients, loadSelectedDateSectionsData  } from '../components/redux/diarySlice';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { View, StyleSheet } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
+async function checkAndUpdateSelectedDate(dispatch) {
+  const today = getTodayDate();
+  const storedDate = await AsyncStorage.getItem('selectedDate');
+
+  if (!storedDate || storedDate !== today) {
+    console.log("🔄 Cập nhật ngày mới khi mở app:", today);
+    await AsyncStorage.setItem('selectedDate', today);
+    dispatch(loadSelectedDateSectionsData(today)); // 🚀 Load dữ liệu ngày mới
+  }
+}
 const LightTheme = {
   ...DefaultTheme,
   colors: {
