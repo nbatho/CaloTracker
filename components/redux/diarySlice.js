@@ -70,7 +70,8 @@ export const addItemToSelectedDate = createAsyncThunk(
       fiber: item.fiber ? item.fiber * (item.quantity / 100) : 0,
       image_url: item.image_url,
       icon: item.icon,
-      quantity: item.quantity
+      quantity: item.quantity,
+      met: item.met || 0
     };
     console.log("🆕 Item added:", newItem);
     allSectionsData[selectedDate][section].push(newItem);

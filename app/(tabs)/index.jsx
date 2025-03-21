@@ -24,8 +24,9 @@ export default function HomeScreen() {
     const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
 
     const TOTAL_KCAL = 2147; 
-    
-    console.log(totalNutrients)
+    const suppliedKcal = totalNutrients.energy || 0;
+    const burnedKcal = totalNutrients.burned || 0; // Giá trị mặc định nếu không có
+    // console.log(totalNutrients)
 
     useEffect(() => {
         dispatch(loadTodaySectionsData());
@@ -48,6 +49,7 @@ export default function HomeScreen() {
     const handleMealSelection = (meal) => {
         if (selectedItem) {
             // console.log(` Adding item to Redux: ${JSON.stringify(selectedItem)}`);
+            console.log("✅ Thêm Activity:", selectedItem);
             dispatch(addItemToSelectedDate({ section: meal, item: selectedItem }));
         }
 
@@ -104,10 +106,20 @@ export default function HomeScreen() {
     return (
         <View style={[styles.container, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F5F5F5' }]}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={{ marginBottom: 20 }}>
-                    <ArcProgress progress={ Math.min((totalNutrients.energy / TOTAL_KCAL) * 100, 100) }  size={200} kcalLeft={Math.floor(2147 - Math.min((totalNutrients.energy / TOTAL_KCAL) * 100, 100))} strokeWidth={15} />
+                
+                <View style={styles.progressContainer}>
+                    <View style={styles.nutritionBox}>
+                        <FontAwesome5 name="chevron-up" size={12} color={isDarkMode ? 'white' : 'black'} />
+                        <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{ suppliedKcal }</Text>
+                        <Text style={[styles.labelText, { color: isDarkMode ? 'white' : 'black' }]}>supplied</Text>
+                    </View>
+                    <ArcProgress progress={Math.min((suppliedKcal / TOTAL_KCAL) * 100, 100)} size={180} kcalLeft={Math.floor(TOTAL_KCAL - suppliedKcal)} strokeWidth={15} />
+                    <View style={styles.nutritionBox}>
+                        <FontAwesome5 name="chevron-down" size={12} color={isDarkMode ? 'white' : 'black'} />
+                        <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{burnedKcal}</Text>
+                        <Text style={[styles.labelText, { color: isDarkMode ? 'white' : 'black' }]}>burned</Text>
+                    </View>
                 </View>
-
                  {/* Nutrition Stats */}
                  <View style={styles.nutritionContainer}>
                     {[
@@ -122,10 +134,10 @@ export default function HomeScreen() {
                                 strokeWidth={6} 
                             />
                             <View style={styles.nutritionInfo}>
-                                <Text style={[styles.nutritionText, { color: isDarkMode ? 'gray' : 'black' }]}>
+                                <Text style={[styles.nutritionText, { color: isDarkMode ? 'white' : 'black' }]}>
                                     {nutrient.progress}/{nutrient.max} g
                                 </Text>
-                                <Text style={[styles.nutritionLabel, { color: isDarkMode ? 'gray' : 'black' }]}>
+                                <Text style={[styles.nutritionLabel, { color: isDarkMode ? 'white' : 'black' }]}>
                                     {nutrient.name}
                                 </Text>
                             </View>
@@ -316,5 +328,16 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         textTransform: 'capitalize',
         marginTop: 2, // Khoảng cách với số liệu progress
+    },
+    kcalText: { fontSize: 16, fontWeight: 'bold', color: 'black' },
+    labelText: { fontSize: 16, fontWeight: 'bold', color: 'black' },
+    progressContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    nutritionBox: {
+        alignItems: 'center',
     },
 });

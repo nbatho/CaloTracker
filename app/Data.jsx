@@ -6,7 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux'; // Import useDispatch
 import { addItemToSelectedDate } from '@/components/redux/diarySlice'; // Import action Redux
-
+import activityData from '@/assets/activity/activity_data.json'; // Import dữ liệu JSON
 const Data = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -17,73 +17,111 @@ const Data = () => {
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [recentlyUsed, setRecentlyUsed] = useState([]);
-
-  const activities = [
-    { id: 'bicycling', name: 'Bicycling', details: 'general', icon: 'bicycle' },
-    { id: 'bicycling_mountain', name: 'Bicycling, Mountain', details: 'general', icon: 'bicycle' },
-    { id: 'unicycling', name: 'Unicycling', details: 'general', icon: 'wheelchair' },
-    { id: 'bicycling_stationary', name: 'Bicycling, Stationary', details: 'general', icon: 'dumbbell' },
-    { id: 'calisthenics', name: 'Calisthenics', details: 'light or moderate effort, general (e.g., back exercises)', icon: 'running' },
-    { id: 'resistance_training', name: 'Resistance training', details: 'weight lifting, free weight, nautilus or universal', icon: 'weight-hanging' },
-    { id: 'rope_skipping', name: 'Rope skipping', details: 'general', icon: 'shoe-prints' },
-    { id: 'water_exercise', name: 'Water exercise', details: 'water aerobics, water calisthenics', icon: 'water' },
-    { id: 'aerobic', name: 'Aerobic', details: 'general', icon: 'music' },
-    { id: 'jogging', name: 'Jogging', details: 'general', icon: 'running' },
-    { id: 'running', name: 'Running', details: 'general', icon: 'running' },
-    { id: 'archery', name: 'Archery', details: 'non-hunting', icon: 'bow-arrow' },
-    { id: 'badminton', name: 'Badminton', details: 'social singles and doubles, general', icon: 'shuttlecock' },
-    { id: 'basketball', name: 'Basketball', details: 'general', icon: 'basketball-ball' },
-    { id: 'billiards', name: 'Billiards', details: 'general', icon: 'circle' },
-    { id: 'bowling', name: 'Bowling', details: 'general', icon: 'bowling-ball' },
-    { id: 'boxing_ring', name: 'Boxing', details: 'in ring, general', icon: 'fist-raised' },
-    { id: 'boxing_bag', name: 'Boxing', details: 'punching bag', icon: 'fist-raised' }, // Same icon because no bag specific icon exists
-    { id: 'broomball', name: 'Broomball', details: 'general', icon: 'skating' },
-    { id: 'childrens_games', name: 'Children\'s games', details: '(e.g., hopscotch, 4-square, dodgeball, playground apparatus, t-ball, tetherball, etc.)', icon: 'wheelchair' },
-    { id: 'cheerleading', name: 'Cheerleading', details: 'gymnastic moves, competitive', icon: 'users' },
-    { id: 'cricket', name: 'Cricket', details: 'batting, bowling, fielding', icon: 'baseball-ball' },
-    { id: 'croquet', name: 'Croquet', details: 'general', icon: 'trophy' },
-    { id: 'curling', name: 'Curling', details: 'general', icon: 'ice-skating' }, //no curling icon, so using ice-skating
-    { id: 'darts', name: 'Darts', details: 'wall or lawn', icon: 'bullseye' },
-    { id: 'auto_racing', name: 'Auto racing', details: 'open wheel', icon: 'car' },
-    { id: 'fencing', name: 'Fencing', details: 'general', icon: 'sword' },
-    { id: 'football', name: 'Football', details: 'touch, flag, general', icon: 'football-ball' },
-    { id: 'football_or_baseball', name: 'Football or baseball', details: 'playing catch', icon: 'baseball-ball' },
-    { id: 'frisbee_playing', name: 'Frisbee playing', details: 'general', icon: 'ticket-alt' }, //Using ticket because there is not frizbee
-    { id: 'golf', name: 'Golf', details: 'general', icon: 'golf-ball' },
-    { id: 'gymnastics', name: 'Gymnastics', details: 'general', icon: 'running' }, //using running for lack of better match
-    { id: 'hacky_sack', name: 'Hacky sack', details: 'general', icon: 'ticket-alt' },  //no Hacky sack so using ticket-alt
-    { id: 'handball', name: 'Handball', details: 'general', icon: 'users' }, //users is kinda good. Not a single icon
-    { id: 'hang_gliding', name: 'Hang gliding', details: 'general', icon: 'medal' },
-    { id: 'hockey_field', name: 'Hockey, field', details: 'general', icon: 'hockey-puck' },
-    { id: 'ice_hockey', name: 'Ice hockey', details: 'general', icon: 'hockey-puck' }, // Same Icon for both Hockey for lack
-    { id: 'horseback_riding', name: 'Horseback riding', details: 'general', icon: 'horse' },
-    { id: 'jai_alai', name: 'Jai alai', details: 'general', icon: 'medal' }, //no Jai alai specific icon so reusing medal
-    { id: 'martial_arts', name: 'Martial arts', details: 'different types, slower pace, novice performers, practice', icon: 'running' },
-      { id: 'paddleball', name: 'Paddleball', details: 'casual, general', icon: 'medal' },// No specific icons
-    { id: 'polo', name: 'Polo', details: 'on horseback', icon: 'horse' },
-        { id: 'racquetball', name: 'Racquetball', details: 'general', icon: 'ticket-alt' },//Using ticket again for lack of match
-        { id: 'climbing', name: 'Climbing', details: 'rock or mountain climbing', icon: 'question-circle' }, //no good climbing, so using the question mark
-        { id: 'rodeo_sports', name: 'Rodeo sports', details: 'general, moderate effort', icon: 'horse' },
-        { id: 'rope_jumping', name: 'Rope jumping', details: 'moderate pace, 100-120 skips/min, general, 2 foot skip, plain bounce', icon: 'shoe-prints' },
-        { id: 'rugby_union', name: 'Rugby', details: 'union, team, competitive', icon: 'football-ball' },
-        { id: 'rugby_touch', name: 'Rugby', details: 'touch, non-competitive', icon: 'football-ball' }, // same with
-        { id: 'shuffleboard', name: 'Shuffleboard', details: 'general', icon: 'medal' },//no shuffleboard icon
-        { id: 'skateboarding', name: 'Skateboarding', details: 'general, moderate effort', icon: 'skating' },
-        { id: 'roller_skating', name: 'Roller skating', details: 'general', icon: 'skating' },
-        { id: 'rollerblading', name: 'Rollerblading', details: 'in-line skating', icon: 'skating' }, // Same icon for both, if you find one please change.
-        { id: 'skydiving', name: 'Skydiving', details: 'skydiving, base jumping, bungee jumping', icon: 'parachute-box' },
-        { id: 'soccer', name: 'Soccer', details: 'casual, general', icon: 'soccer-ball' },
-        { id: 'softball_baseball', name: 'Softball / baseball', details: 'fast or slow pitch, general', icon: 'baseball-ball' },
-
-        //Added last set from images
-        { id: 'squash', name: 'Squash', details: 'general', icon: 'ticket-alt' },  // There wasn't another useful.
-        { id: 'table_tennis', name: 'Table tennis', details: 'table tennis, ping pong', icon: 'table-tennis' },
-        { id: 'tai_chi', name: 'Tai chi, qi gong', details: 'general', icon: 'running' },//Same as gymnastic
-        { id: 'tennis', name: 'Tennis', details: 'general', icon: 'tennis-ball' },
-        { id: 'trampoline', name: 'Trampoline', details: 'recreational', icon: 'medal' }, //Used ticket because better here
-  ];
-
-  const filteredActivities = activities.filter((activity) =>
+  const [activities, setActivities] = useState([]);
+  useEffect(() => {
+    const formattedActivities = activityData.physicalActivities.map(activity => ({
+      id: activity.id,
+      name: activity.name,
+      details: activity.description,
+      met: activity.met,
+      icon: getIcon(activity.name), // Lấy icon chính xác
+    }));
+    setActivities(formattedActivities);
+  }, []);
+  const getIcon = (name) => {
+    const iconMap = {
+      "bicycling": "bicycle",
+      "bicycling, mountain": "bicycle",
+      "unicycling": "dot-circle",
+      "bicycling, stationary": "dumbbell",
+      "calisthenics": "running",
+      "resistance training": "weight-hanging",
+      "rope skipping": "shoe-prints",
+      "water exercise": "water",
+      "aerobic": "music",
+      "jogging": "running",
+      "running": "running",
+      "archery": "bow-arrow",
+      "badminton": "table-tennis",
+      "basketball": "basketball-ball",
+      "billiards": "circle",
+      "bowling": "bowling-ball",
+      "boxing": "hand-rock",
+      "broomball": "broom",
+      "cheerleading": "user-friends",
+      "cricket": "baseball-ball",
+      "croquet": "golf-ball",
+      "curling": "snowflake",
+      "darts": "bullseye",
+      "auto racing": "car",
+      "fencing": "user-shield",
+      "football": "football-ball",
+      "golf": "golf-ball",
+      "gymnastics": "child",
+      "handball": "hand-paper",
+      "hockey, field": "hockey-puck",
+      "ice hockey": "hockey-puck",
+      "horseback riding": "horse",
+      "martial arts": "hand-rock",
+      "paddleball": "table-tennis",
+      "polo": "horse",
+      "racquetball": "table-tennis",
+      "climbing": "mountain",
+      "rugby": "football-ball",
+      "skateboarding": "skating",
+      "roller skating": "skating",
+      "rollerblading": "skating",
+      "skydiving": "parachute-box",
+      "soccer": "futbol",
+      "softball / baseball": "baseball-ball",
+      "squash": "table-tennis",
+      "table tennis": "table-tennis",
+      "tennis": "table-tennis",
+      "trampoline": "child",
+      "volleyball": "volleyball-ball",
+      "wrestling": "users",
+      "swimming": "swimmer",
+      "diving": "swimmer",
+      "kayaking": "water",
+      "surfing": "water",
+      "water polo": "swimmer",
+      "ice skating": "snowflake",
+      "skiing": "skiing",
+      "snow shoveling": "snowflake",
+      "walking": "walking",
+      "hiking": "hiking",
+      "track and field": "running",
+      "frisbee playing": "compact-disc",
+      "children’s games": "child",
+      "juggling": "spinner",
+      "hacky sack": "circle",
+      "lacrosse": "hockey-puck",
+      "orienteering": "map-marked",
+      "paddle boarding": "swimmer",
+      "tai chi, qi gong": "yin-yang",
+      "moto-cross": "motorcycle",
+      "rodeo sports": "horse",
+      "auto racing": "flag-checkered",
+      "archery": "bullseye", 
+      "hang gliding": "wind", 
+      "jai alai": "volleyball-ball", 
+      "lawn bowling": "bowling-ball",
+      "rope jumping": "shoe-prints", 
+      "shuffleboard": "grip-lines", 
+      "wallyball": "volleyball-ball",
+      "backpacking": "hiking",
+      "walking the dog": "dog", 
+      "paddle boat": "ship",
+      "sailing": "anchor",
+      "water skiing": "swimmer", 
+      "snorkeling": "mask", 
+      "water aerobics": "swimmer",
+    };
+  
+    return iconMap[name.toLowerCase()] || "question-circle"; // Trả về icon mặc định nếu không có trong danh sách
+  };
+  
+  const filteredActivities = activities.filter(activity =>
     activity.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -97,10 +135,7 @@ const Data = () => {
   };
 
   const handleAddActivity = (activity) => {
-    // Dispatch action Redux để thêm hoạt động
-    dispatch(addItemToSelectedDate({ section: "Activity", item: activity })); // "Activity" là section mặc định
-
-    // Sau khi dispatch, quay lại màn hình trước
+    dispatch(addItemToSelectedDate({ section: "Activity", item: { ...activity, met: activity.met } }));
     navigation.goBack();
   };
 

@@ -1,0 +1,642 @@
+{
+    "physicalActivities": [
+      {
+        "id": "01015",
+        "name": "bicycling",
+        "description": "general",
+        "met": 7.5,
+        "type": "bicycling"
+      },
+      {
+        "id": "01009",
+        "name": "bicycling, mountain",
+        "description": "general",
+        "met": 8.5,
+        "type": "bicycling"
+      },
+      {
+        "id": "01070",
+        "name": "unicycling",
+        "description": "general",
+        "met": 5.0,
+        "type": "bicycling"
+      },
+      {
+        "id": "02010",
+        "name": "bicycling, stationary",
+        "description": "general",
+        "met": 7.5,
+        "type": "conditioningExercise"
+      },
+      {
+        "id": "02030",
+        "name": "calisthenics",
+        "description": "light or moderate effort, general (e.g., back exercises)",
+        "met": 3.5,
+        "type": "conditioningExercise"
+      },
+      {
+        "id": "02050",
+        "name": "resistance training",
+        "description": "weight lifting, free weight, nautilus or universal",
+        "met": 6.0,
+        "type": "conditioningExercise"
+      },
+      {
+        "id": "02068",
+        "name": "rope skipping",
+        "description": "general",
+        "met": 12.3,
+        "type": "conditioningExercise"
+      },
+      {
+        "id": "02120",
+        "name": "water exercise",
+        "description": "water aerobics, water calisthenics",
+        "met": 5.3,
+        "type": "conditioningExercise"
+      },
+      {
+        "id": "03015",
+        "name": "aerobic",
+        "description": "general",
+        "met": 7.3,
+        "type": "dancing"
+      },
+      {
+        "id": "12020",
+        "name": "jogging",
+        "description": "general",
+        "met": 7.0,
+        "type": "running"
+      },
+      {
+        "id": "12150",
+        "name": "running",
+        "description": "general",
+        "met": 8.0,
+        "type": "running"
+      },
+      {
+        "id": "15010",
+        "name": "archery",
+        "description": "non-hunting",
+        "met": 4.3,
+        "type": "sport"
+      },
+      {
+        "id": "15030",
+        "name": "badminton",
+        "description": "social singles and doubles, general",
+        "met": 5.5,
+        "type": "sport"
+      },
+      {
+        "id": "15055",
+        "name": "basketball",
+        "description": "general",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "15080",
+        "name": "billiards",
+        "description": "general",
+        "met": 2.5,
+        "type": "sport"
+      },
+      {
+        "id": "15090",
+        "name": "bowling",
+        "description": "general",
+        "met": 3.0,
+        "type": "sport"
+      },
+      {
+        "id": "15100",
+        "name": "boxing",
+        "description": "in ring, general",
+        "met": 12.8,
+        "type": "sport"
+      },
+      {
+        "id": "15110",
+        "name": "boxing",
+        "description": "punching bag",
+        "met": 5.5,
+        "type": "sport"
+      },
+      {
+        "id": "15130",
+        "name": "broomball",
+        "description": "general",
+        "met": 7.0,
+        "type": "sport"
+      },
+      {
+        "id": "15135",
+        "name": "children’s games",
+        "description": "moderate effort",
+        "met": 5.8,
+        "type": "sport"
+      },
+      {
+        "id": "15138",
+        "name": "cheerleading",
+        "description": "gymnastic moves, competitive",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "15150",
+        "name": "cricket",
+        "description": "batting, bowling, fielding",
+        "met": 4.8,
+        "type": "sport"
+      },
+      {
+        "id": "15160",
+        "name": "croquet",
+        "description": "general",
+        "met": 3.3,
+        "type": "sport"
+      },
+      {
+        "id": "15170",
+        "name": "curling",
+        "description": "general",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15180",
+        "name": "darts",
+        "description": "wall or lawn",
+        "met": 2.5,
+        "type": "sport"
+      },
+      {
+        "id": "15192",
+        "name": "auto racing",
+        "description": "open wheel",
+        "met": 8.5,
+        "type": "sport"
+      },
+      {
+        "id": "15200",
+        "name": "fencing",
+        "description": "general",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "15230",
+        "name": "football",
+        "description": "touch, flag, general",
+        "met": 8.0,
+        "type": "sport"
+      },
+      {
+        "id": "15235",
+        "name": "football or baseball",
+        "description": "playing catch",
+        "met": 2.5,
+        "type": "sport"
+      },
+      {
+        "id": "15240",
+        "name": "frisbee playing",
+        "description": "general",
+        "met": 3.0,
+        "type": "sport"
+      },
+      {
+        "id": "15255",
+        "name": "golf",
+        "description": "general",
+        "met": 4.8,
+        "type": "sport"
+      },
+      {
+        "id": "15300",
+        "name": "gymnastics",
+        "description": "general",
+        "met": 3.8,
+        "type": "sport"
+      },
+      {
+        "id": "15310",
+        "name": "hacky sack",
+        "description": "general",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15320",
+        "name": "handball",
+        "description": "general",
+        "met": 12.0,
+        "type": "sport"
+      },
+      {
+        "id": "15340",
+        "name": "hang gliding",
+        "description": "general",
+        "met": 3.5,
+        "type": "sport"
+      },
+      {
+        "id": "15350",
+        "name": "hockey, field",
+        "description": "general",
+        "met": 7.8,
+        "type": "sport"
+      },
+      {
+        "id": "15360",
+        "name": "ice hockey",
+        "description": "general",
+        "met": 8.0,
+        "type": "sport"
+      },
+      {
+        "id": "15370",
+        "name": "horseback riding",
+        "description": "general",
+        "met": 5.5,
+        "type": "sport"
+      },
+      {
+        "id": "15420",
+        "name": "jai alai",
+        "description": "general",
+        "met": 12.0,
+        "type": "sport"
+      },
+      {
+        "id": "15425",
+        "name": "martial arts",
+        "description": "different types, slower pace, novice performers, practice",
+        "met": 5.3,
+        "type": "sport"
+      },
+      {
+        "id": "15430",
+        "name": "martial arts",
+        "description": "different types, moderate pace (e.g., judo, jujitsu, karate, kick boxing, tae kwan do, tai-bo, Muay Thai boxing)",
+        "met": 10.3,
+        "type": "sport"
+      },
+      {
+        "id": "15440",
+        "name": "juggling",
+        "description": "general",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15460",
+        "name": "lacrosse",
+        "description": "general",
+        "met": 8.0,
+        "type": "sport"
+      },
+      {
+        "id": "15465",
+        "name": "lawn bowling",
+        "description": "bocce ball, outdoor",
+        "met": 3.3,
+        "type": "sport"
+      },
+      {
+        "id": "15470",
+        "name": "moto-cross",
+        "description": "off-road motor sports, all-terrain vehicle, general",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15480",
+        "name": "orienteering",
+        "description": "general",
+        "met": 9.0,
+        "type": "sport"
+      },
+      {
+        "id": "15500",
+        "name": "paddleball",
+        "description": "casual, general",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "15510",
+        "name": "polo",
+        "description": "on horseback",
+        "met": 8.0,
+        "type": "sport"
+      },
+      {
+        "id": "15530",
+        "name": "racquetball",
+        "description": "general",
+        "met": 7.0,
+        "type": "sport"
+      },
+      {
+        "id": "15533",
+        "name": "climbing",
+        "description": "rock or mountain climbing",
+        "met": 8.0,
+        "type": "sport"
+      },
+      {
+        "id": "15544",
+        "name": "rodeo sports",
+        "description": "general, moderate effort",
+        "met": 5.5,
+        "type": "sport"
+      },
+      {
+        "id": "15551",
+        "name": "rope jumping",
+        "description": "moderate pace, 100-120 skips/min, general, 2 foot skip, plain bounce",
+        "met": 11.8,
+        "type": "sport"
+      },
+      {
+        "id": "15560",
+        "name": "rugby",
+        "description": "union, team, competitive",
+        "met": 8.3,
+        "type": "sport"
+      },
+      {
+        "id": "15562",
+        "name": "rugby",
+        "description": "touch, non-competitive",
+        "met": 6.3,
+        "type": "sport"
+      },
+      {
+        "id": "15570",
+        "name": "shuffleboard",
+        "description": "general",
+        "met": 3.0,
+        "type": "sport"
+      },
+      {
+        "id": "15580",
+        "name": "skateboarding",
+        "description": "general, moderate effort",
+        "met": 5.0,
+        "type": "sport"
+      },
+      {
+        "id": "15590",
+        "name": "skating",
+        "description": "roller",
+        "met": 7.0,
+        "type": "sport"
+      },
+      {
+        "id": "15592",
+        "name": "rollerblading",
+        "description": "in-line skating, 14.4 km/h (9.0 mph), recreational pace",
+        "met": 7.5,
+        "type": "sport"
+      },
+      {
+        "id": "15600",
+        "name": "skydiving",
+        "description": "skydiving, base jumping, bungee jumping",
+        "met": 3.5,
+        "type": "sport"
+      },
+      {
+        "id": "15610",
+        "name": "soccer",
+        "description": "casual, general",
+        "met": 7.0,
+        "type": "sport"
+      },
+      {
+        "id": "15620",
+        "name": "softball / baseball",
+        "description": "fast or slow pitch, general",
+        "met": 5.0,
+        "type": "sport"
+      },
+      {
+        "id": "15652",
+        "name": "squash",
+        "description": "general",
+        "met": 7.3,
+        "type": "sport"
+      },
+      {
+        "id": "15660",
+        "name": "table tennis",
+        "description": "table tennis, ping pong",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15670",
+        "name": "tai chi, qi gong",
+        "description": "general",
+        "met": 3.0,
+        "type": "sport"
+      },
+      {
+        "id": "15675",
+        "name": "tennis",
+        "description": "general",
+        "met": 7.3,
+        "type": "sport"
+      },
+      {
+        "id": "15700",
+        "name": "trampoline",
+        "description": "recreational",
+        "met": 3.5,
+        "type": "sport"
+      },
+      {
+        "id": "15710",
+        "name": "volleyball",
+        "description": "non-competitive, 6 - 9 member team, general",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15730",
+        "name": "wrestling",
+        "description": "general",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "15731",
+        "name": "wallyball",
+        "description": "general",
+        "met": 7.0,
+        "type": "sport"
+      },
+      {
+        "id": "15732",
+        "name": "track and field",
+        "description": "(e.g. shot, discus, hammer throw)",
+        "met": 4.0,
+        "type": "sport"
+      },
+      {
+        "id": "15733",
+        "name": "track and field",
+        "description": "(e.g. high jump, long jump, triple jump, javelin, pole vault)",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "15734",
+        "name": "track and field",
+        "description": "(e.g. steeplechase, hurdles)",
+        "met": 10.0,
+        "type": "sport"
+      },
+      {
+        "id": "17010",
+        "name": "backpacking",
+        "description": "general",
+        "met": 7.0,
+        "type": "sport"
+      },
+      {
+        "id": "17080",
+        "name": "hiking",
+        "description": "cross country",
+        "met": 6.0,
+        "type": "sport"
+      },
+      {
+        "id": "17160",
+        "name": "walking",
+        "description": "for pleasure",
+        "met": 3.5,
+        "type": "sport"
+      },
+      {
+        "id": "17165",
+        "name": "walking the dog",
+        "description": "general",
+        "met": 3.0,
+        "type": "sport"
+      },
+      {
+        "id": "18090",
+        "name": "diving",
+        "description": "springboard or platform",
+        "met": 3.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18100",
+        "name": "kayaking",
+        "description": "moderate effort",
+        "met": 5.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18110",
+        "name": "paddle boat",
+        "description": "general",
+        "met": 4.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18120",
+        "name": "sailing",
+        "description": "boat and board sailing, windsurfing, ice sailing, general",
+        "met": 3.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18150",
+        "name": "water skiing",
+        "description": "water or wakeboarding",
+        "met": 6.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18200",
+        "name": "diving",
+        "description": "skindiving, scuba diving, general",
+        "met": 7.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18210",
+        "name": "snorkeling",
+        "description": "general",
+        "met": 5.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18220",
+        "name": "surfing",
+        "description": "body or board, general",
+        "met": 3.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18225",
+        "name": "paddle boarding",
+        "description": "standing",
+        "met": 6.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18350",
+        "name": "swimming",
+        "description": "treading water, moderate effort, general",
+        "met": 3.5,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18355",
+        "name": "water aerobics",
+        "description": "water aerobics, water calisthenics",
+        "met": 5.5,
+        "type": "waterActivities"
+      },
+      {
+        "id": "18360",
+        "name": "water polo",
+        "description": "general",
+        "met": 10.0,
+        "type": "waterActivities"
+      },
+      {
+        "id": "19030",
+        "name": "ice skating",
+        "description": "general",
+        "met": 7.0,
+        "type": "winterActivities"
+      },
+      {
+        "id": "19075",
+        "name": "skiing",
+        "description": "general",
+        "met": 7.0,
+        "type": "winterActivities"
+      },
+      {
+        "id": "19252",
+        "name": "snow shoveling",
+        "description": "by hand, moderate effort",
+        "met": 5.3,
+        "type": "winterActivities"
+      }
+    ]
+  }
+  
