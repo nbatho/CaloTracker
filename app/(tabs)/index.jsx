@@ -24,9 +24,10 @@ export default function HomeScreen() {
     const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
 
     const TOTAL_KCAL = 2147; 
+    const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
-    const burnedKcal = totalNutrients.burned || 0; // Giá trị mặc định nếu không có
-    // console.log(totalNutrients)
+    const burnedKcal = totalNutrients.totalMET || 0; // Giá trị mặc định nếu không có
+    console.log(totalNutrients)
 
     useEffect(() => {
         dispatch(loadTodaySectionsData());
