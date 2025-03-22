@@ -7,7 +7,7 @@ import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } f
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RingProgress from '../../components/RingProgress';
 import ArcProgress from '../../components/ArcProgress';
-import { loadUserData } from '@/components/redux/diarySlice';
+
 const SPACING = 20;
 const AVATAR_SIZE = 72;
 
@@ -31,18 +31,10 @@ export default function HomeScreen() {
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     const burnedKcal = totalNutrients.totalMET || 0;
-    // console.log(totalNutrients)
+    console.log(totalNutrients)
 
     const scrollY = new Animated.Value(0);
-    const userData = useSelector((state) => state.diary.userData); // Lấy dữ liệu từ Redux
 
-    useEffect(() => {
-        dispatch(loadUserData()); // Load dữ liệu khi mở trang
-    }, [dispatch]);
-
-    useEffect(() => {
-        console.log("🛠️ Kiểm tra dữ liệu userData:", userData);
-    }, [userData]);
     useEffect(() => {
         dispatch(loadTodaySectionsData());
     }, [dispatch]);
@@ -137,6 +129,8 @@ export default function HomeScreen() {
                     scrollY.setValue(event.nativeEvent.contentOffset.y);
                 }}
                 scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                
             >
 
                 {/* Progress and Nutrition Stats */}
@@ -314,7 +308,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: SPACING, backgroundColor: '#F5F5F5' },
-    scrollContainer: { paddingBottom: 100 },
+    scrollContainer: {   borderColor: 'transparent', overflow: 'hidden', borderWidth: 0 },
     topSection: { // Style cho phần kcal và nutrition
         padding: SPACING,
         borderRadius: 10,
@@ -334,6 +328,7 @@ const styles = StyleSheet.create({
     },
     dataContainer: {
         flexDirection: 'row',
+        alignItems: 'center'
     },
     dataItem: {
         width: AVATAR_SIZE,
@@ -378,7 +373,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: SPACING * 2,
         right: SPACING,
-        backgroundColor: '#007bff',
+        backgroundColor: '#a1ce50ff',
         width: 60,
         height: 60,
         borderRadius: 30,
