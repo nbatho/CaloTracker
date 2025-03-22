@@ -29,7 +29,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#a1ce50ff', // Màu active mới
+        tabBarInactiveTintColor: 'gray', // Màu inactive mới
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
@@ -90,7 +91,7 @@ export default function TabLayout() {
         name="AI"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <Entypo name="classic-computer" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Entypo name="leaf" size={24} color={color} />,
           headerTitle: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Entypo name="bar-graph" size={24} color={Colors[colorScheme ?? 'light'].tint} />

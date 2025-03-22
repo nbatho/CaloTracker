@@ -3,30 +3,33 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, useCol
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDispatch } from 'react-redux'; // Import useDispatch
-import { addItemToSelectedDate } from '@/components/redux/diarySlice'; // Import action Redux
-import activityData from '@/assets/activity/activity_data.json'; // Import dữ liệu JSON
+import { useDispatch } from 'react-redux';
+import { addItemToSelectedDate } from '@/components/redux/diarySlice';
+import activityData from '@/assets/activity/activity_data.json';
+
 const Data = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const theme = useColorScheme();
   const isDarkMode = theme === 'dark';
-  const dispatch = useDispatch(); // Khởi tạo dispatch
+  const dispatch = useDispatch();
 
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [recentlyUsed, setRecentlyUsed] = useState([]);
   const [activities, setActivities] = useState([]);
+
   useEffect(() => {
     const formattedActivities = activityData.physicalActivities.map(activity => ({
       id: activity.id,
       name: activity.name,
       details: activity.description,
       met: activity.met,
-      icon: getIcon(activity.name), // Lấy icon chính xác
+      icon: getIcon(activity.name),
     }));
     setActivities(formattedActivities);
   }, []);
+
   const getIcon = (name) => {
     const iconMap = {
       "bicycling": "bicycle",
@@ -101,25 +104,25 @@ const Data = () => {
       "moto-cross": "motorcycle",
       "rodeo sports": "horse",
       "auto racing": "flag-checkered",
-      "archery": "bullseye", 
-      "hang gliding": "wind", 
-      "jai alai": "volleyball-ball", 
+      "archery": "bullseye",
+      "hang gliding": "wind",
+      "jai alai": "volleyball-ball",
       "lawn bowling": "bowling-ball",
-      "rope jumping": "shoe-prints", 
-      "shuffleboard": "grip-lines", 
+      "rope jumping": "shoe-prints",
+      "shuffleboard": "grip-lines",
       "wallyball": "volleyball-ball",
       "backpacking": "hiking",
-      "walking the dog": "dog", 
+      "walking the dog": "dog",
       "paddle boat": "ship",
       "sailing": "anchor",
-      "water skiing": "swimmer", 
-      "snorkeling": "mask", 
+      "water skiing": "swimmer",
+      "snorkeling": "mask",
       "water aerobics": "swimmer",
     };
-  
-    return iconMap[name.toLowerCase()] || "question-circle"; // Trả về icon mặc định nếu không có trong danh sách
+
+    return iconMap[name.toLowerCase()] || "question-circle";
   };
-  
+
   const filteredActivities = activities.filter(activity =>
     activity.name.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -127,7 +130,6 @@ const Data = () => {
   const displayedActivities = activeTab === "All" ? filteredActivities : recentlyUsed;
 
   const handleActivityPress = (activity) => {
-    // Add the activity to the recentlyUsed list if it's not already there
     if (!recentlyUsed.some((item) => item.id === activity.id)) {
       setRecentlyUsed([activity, ...recentlyUsed]);
     }
@@ -178,15 +180,15 @@ const Data = () => {
         </View>
 
         {/* Activity List */}
-        <ScrollView>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           {displayedActivities.map((activity) => (
-            <TouchableOpacity key={activity.id} style={styles.activityItem} onPress={() => handleActivityPress(activity)}>
+            <TouchableOpacity key={activity.id} style={[styles.activityItem, { backgroundColor: isDarkMode ? '#333333' : 'white' }]} onPress={() => handleActivityPress(activity)}>
               <View style={styles.iconContainer}>
                 <FontAwesome5 name={activity.icon} size={24} color={isDarkMode ? 'white' : 'black'} />
               </View>
               <View style={styles.textContainer}>
                 <Text style={[styles.activityName, { color: isDarkMode ? 'white' : 'black' }]}>{activity.name}</Text>
-                <Text style={[styles.activityDetails, { color: 'gray' }]}>{activity.details}</Text>
+                <Text style={[styles.activityDetails, { color: isDarkMode ? 'lightgray' : 'gray' }]}>{activity.details}</Text>
               </View>
               <TouchableOpacity style={styles.addButton} onPress={() => handleAddActivity(activity)}>
                 <Text style={styles.addButtonText}>+</Text>
@@ -244,21 +246,33 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   activeTab: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#a1ce50ff",
   },
   tabText: {
     fontSize: 16,
   },
   activeTabText: {
     color: "white",
-    textAlignVertical:'center',
+    textAlignVertical: 'center',
+  },
+  scrollContent: {
+    paddingBottom: 16,
   },
   activityItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    paddingHorizontal: 16, // Thêm padding ngang
+    marginBottom: 8, // Thêm margin dưới
+    borderRadius: 10, // Bo tròn góc
+    shadowColor: "#000", // Thêm bóng
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
   },
   iconContainer: {
     marginRight: 16,
@@ -272,10 +286,9 @@ const styles = StyleSheet.create({
   },
   activityDetails: {
     fontSize: 12,
-    color: "#777",
   },
   addButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#a1ce50ff",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
