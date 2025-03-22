@@ -36,7 +36,7 @@ export default function DiaryScreen() {
 
     const currentRoute = navigationState.routes[navigationState.index].name;
     if (currentRoute !== "Diary") {
-      console.log("📌 Rời khỏi Diary, reset về ngày hôm nay");
+      // console.log(" Rời khỏi Diary, reset về ngày hôm nay");
       setSelectedDate(getTodayDate());
       AsyncStorage.setItem('selectedDate', getTodayDate());
     }
@@ -50,7 +50,7 @@ export default function DiaryScreen() {
         const storedDate = await AsyncStorage.getItem('selectedDate');
 
         if (storedDate !== today) {
-          console.log("🔄 Diary được mở, cập nhật ngày hiện tại");
+          // console.log(" Diary được mở, cập nhật ngày hiện tại");
           setSelectedDate(today);
           await AsyncStorage.setItem('selectedDate', today);
         }
@@ -86,7 +86,7 @@ export default function DiaryScreen() {
         <Image
           source={{ uri: item.image_url }}
           style={styles.foodImage}
-          onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
+          onError={(error) => console.log(" Image Load Error:", error.nativeEvent)}
         />
       );
     } else {

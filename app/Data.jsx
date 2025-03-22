@@ -1,4 +1,3 @@
-// AI.jsx
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, useColorScheme } from "react-native";
 import { FontAwesome5 } from '@expo/vector-icons';

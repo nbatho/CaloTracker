@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, useColorScheme } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router'; // ✅ Import router
+import { useLocalSearchParams, useRouter } from 'expo-router'; // Import router
 
 const MealDetailScreen = () => {
   const colorScheme = useColorScheme();
   const params = useLocalSearchParams();
-  const router = useRouter(); // ✅ Dùng router thay vì navigation
+  const router = useRouter(); // Dùng router thay vì navigation
   const product = params.product;
 
   // console.log("Received params:", params);

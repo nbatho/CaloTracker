@@ -27,7 +27,6 @@ export default function HomeScreen() {
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     const burnedKcal = totalNutrients.totalMET || 0; // Giá trị mặc định nếu không có
-    console.log(totalNutrients)
 
     useEffect(() => {
         dispatch(loadTodaySectionsData());
@@ -50,7 +49,7 @@ export default function HomeScreen() {
     const handleMealSelection = (meal) => {
         if (selectedItem) {
             // console.log(` Adding item to Redux: ${JSON.stringify(selectedItem)}`);
-            console.log("✅ Thêm Activity:", selectedItem);
+            console.log(" Thêm Activity:", selectedItem);
             dispatch(addItemToSelectedDate({ section: meal, item: selectedItem }));
         }
 
@@ -59,7 +58,7 @@ export default function HomeScreen() {
 
         // Đợi 500ms để tránh lỗi Fragment chưa gắn vào UI
         setTimeout(() => {
-            // console.log("✅ Item added successfully. Resetting productData...");
+            // console.log(" Item added successfully. Resetting productData...");
             setSelectedItem(null);
             navigation.setParams({ product: null });
         }, 500);
@@ -84,7 +83,7 @@ export default function HomeScreen() {
                     <Image
                         source={{ uri: item.image_url }}
                         style={styles.foodImage}
-                        onError={(error) => console.log("❌ Image Load Error:", error.nativeEvent)}
+                        onError={(error) => console.log(" Image Load Error:", error.nativeEvent)}
                     />
                     <View style={styles.overlay}>
                         <Text style={styles.overlayText}>{item.energy} kcal</Text>
@@ -103,7 +102,6 @@ export default function HomeScreen() {
             );
         }
     };
-
     return (
         <View style={[styles.container, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F5F5F5' }]}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -114,7 +112,7 @@ export default function HomeScreen() {
                         <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{ suppliedKcal }</Text>
                         <Text style={[styles.labelText, { color: isDarkMode ? 'white' : 'black' }]}>supplied</Text>
                     </View>
-                    <ArcProgress progress={Math.min((suppliedKcal / TOTAL_KCAL) * 100, 100)} size={180} kcalLeft={Math.floor(TOTAL_KCAL - suppliedKcal)} strokeWidth={15} />
+                    <ArcProgress progress={suppliedKcal + burnedKcal } size={180} kcalLeft={TOTAL_KCAL - suppliedKcal - burnedKcal} strokeWidth={15} />
                     <View style={styles.nutritionBox}>
                         <FontAwesome5 name="chevron-down" size={12} color={isDarkMode ? 'white' : 'black'} />
                         <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{burnedKcal}</Text>
@@ -174,7 +172,7 @@ export default function HomeScreen() {
                                         try {
                                             return renderItemContent(section, item, isDarkMode);
                                         } catch (error) {
-                                            console.error("❌ Error rendering item:", error);
+                                            console.error(" Error rendering item:", error);
                                             return <Text style={{ color: 'red' }}>Error</Text>;
                                         }
                                     })()}

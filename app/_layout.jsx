@@ -22,9 +22,9 @@ async function checkAndUpdateSelectedDate(dispatch) {
   const storedDate = await AsyncStorage.getItem('selectedDate');
 
   if (!storedDate || storedDate !== today) {
-    console.log("🔄 Cập nhật ngày mới khi mở app:", today);
+    console.log(" Cập nhật ngày mới khi mở app:", today);
     await AsyncStorage.setItem('selectedDate', today);
-    dispatch(loadSelectedDateSectionsData(today)); // 🚀 Load dữ liệu ngày mới
+    dispatch(loadSelectedDateSectionsData(today)); //  Load dữ liệu ngày mới
   }
 }
 const LightTheme = {
@@ -35,7 +35,7 @@ const LightTheme = {
   },
 };
 
-// 🆕 Tạo component riêng để dùng dispatch
+//  Tạo component riêng để dùng dispatch
 function AppContent() {
   const dispatch = useDispatch();
   const colorScheme = useColorScheme();
