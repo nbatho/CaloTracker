@@ -7,7 +7,7 @@ import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } f
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RingProgress from '../../components/RingProgress';
 import ArcProgress from '../../components/ArcProgress';
-
+import { loadUserData } from '@/components/redux/diarySlice';
 const SPACING = 20;
 const AVATAR_SIZE = 72;
 
@@ -31,10 +31,18 @@ export default function HomeScreen() {
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     const burnedKcal = totalNutrients.totalMET || 0;
-    console.log(totalNutrients)
+    // console.log(totalNutrients)
 
     const scrollY = new Animated.Value(0);
+    const userData = useSelector((state) => state.diary.userData); // Lấy dữ liệu từ Redux
 
+    useEffect(() => {
+        dispatch(loadUserData()); // Load dữ liệu khi mở trang
+    }, [dispatch]);
+
+    useEffect(() => {
+        console.log("🛠️ Kiểm tra dữ liệu userData:", userData);
+    }, [userData]);
     useEffect(() => {
         dispatch(loadTodaySectionsData());
     }, [dispatch]);

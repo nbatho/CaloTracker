@@ -8,7 +8,7 @@ import 'react-native-reanimated';
 
 import { Provider, useDispatch } from 'react-redux';  
 import store from '../components/redux/store';
-import { loadTotalNutrients, loadSelectedDateSectionsData  } from '../components/redux/diarySlice';
+import { loadTotalNutrients, loadSelectedDateSectionsData,loadUserData  } from '../components/redux/diarySlice';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { View, StyleSheet } from 'react-native';
@@ -42,7 +42,9 @@ function AppContent() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-
+  useEffect(() => {
+    dispatch(loadUserData()); // 🚀 Load userData khi app mở
+  }, []);
   useEffect(() => {
     dispatch(loadTotalNutrients()); // 🚀 Load totalNutrients khi app khởi động
 

@@ -40,7 +40,17 @@ const loadDataInRange = async (startDate) => {
 
   return sortedData;
 };
+// 🆕 Lưu dữ liệu người dùng sau onboarding
+export const saveUserData = createAsyncThunk('diary/saveUserData', async (userData) => {
+  await AsyncStorage.setItem('userData', JSON.stringify(userData));
+  return userData;
+});
 
+// 🆕 Load dữ liệu người dùng khi app mở
+export const loadUserData = createAsyncThunk('diary/loadUserData', async () => {
+  const storedData = await AsyncStorage.getItem('userData');
+  return storedData ? JSON.parse(storedData) : null;
+});
 // Load dữ liệu trong tuần
 export const loadWeekData = createAsyncThunk('diary/loadWeekData', async () => {
   const startDate = getStartOfWeek(getTodayDate());
@@ -201,6 +211,7 @@ const diarySlice = createSlice({
   initialState: { 
     calendars: [], 
     loading: false, 
+    userData: null,
     error: null, 
     todaySectionsData: {
       Activity: [],
@@ -231,6 +242,12 @@ const diarySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(saveUserData.fulfilled, (state, action) => {
+        state.userData = action.payload;
+      })
+      .addCase(loadUserData.fulfilled, (state, action) => {
+        state.userData = action.payload;
+      })
       .addCase(loadTotalNutrients.fulfilled, (state, action) => {
         state.totalNutrients = action.payload;
       })
