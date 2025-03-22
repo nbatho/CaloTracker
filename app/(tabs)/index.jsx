@@ -129,6 +129,8 @@ export default function HomeScreen() {
                     scrollY.setValue(event.nativeEvent.contentOffset.y);
                 }}
                 scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                
             >
 
                 {/* Progress and Nutrition Stats */}
@@ -306,7 +308,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: SPACING, backgroundColor: '#F5F5F5' },
-    scrollContainer: { paddingBottom: 100 },
+    scrollContainer: {   borderColor: 'transparent', overflow: 'hidden', borderWidth: 0 },
     topSection: { // Style cho phần kcal và nutrition
         padding: SPACING,
         borderRadius: 10,
@@ -326,6 +328,7 @@ const styles = StyleSheet.create({
     },
     dataContainer: {
         flexDirection: 'row',
+        alignItems: 'center'
     },
     dataItem: {
         width: AVATAR_SIZE,
@@ -370,7 +373,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: SPACING * 2,
         right: SPACING,
-        backgroundColor: '#007bff',
+        backgroundColor: '#a1ce50ff',
         width: 60,
         height: 60,
         borderRadius: 30,

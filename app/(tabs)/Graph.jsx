@@ -255,9 +255,9 @@ const styles = StyleSheet.create({
   header: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
   chartTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 10, marginTop: 20 },
   tabsContainer: { flexDirection: "row", justifyContent: "space-around", marginBottom: 20 },
-  tabButton: { paddingVertical: 8, paddingHorizontal: 20, borderRadius: 20, borderWidth: 1, borderColor: "#007AFF" },
-  tabButtonSelected: { backgroundColor: "#007AFF" },
-  tabText: { fontSize: 16, fontWeight: "bold", color: "#007AFF" },
+  tabButton: { paddingVertical: 8, paddingHorizontal: 20, borderRadius: 20, borderWidth: 1, borderColor: "#a1ce50ff" },
+  tabButtonSelected: { backgroundColor: "#a1ce50ff" },
+  tabText: { fontSize: 16, fontWeight: "bold", color: "#a1ce50ff" },
   tabTextSelected: { color: "#fff" },
   chart: { borderRadius: 10 },
 });
