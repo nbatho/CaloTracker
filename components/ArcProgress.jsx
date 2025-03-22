@@ -37,16 +37,23 @@ const RingProgress = ({ progress, size, strokeWidth, kcalLeft }) => {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={isDarkMode ? 'green' : '#4CAF50'}
+          stroke={isDarkMode ? '#a1ce50ff' : '#a1ce50ff'}
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
         />
+        {/* Add the start point indicator on the right */}
+        <Circle
+          cx={size / 2 + radius} // Position on the right of the circle
+          cy={size / 2} // Center the dot vertically
+          r={strokeWidth / 2} // Radius of the dot
+          fill={isDarkMode ? '#a1ce50ff' : '#a1ce50ff'} // Dot color
+        />
       </Svg>
       <View style={styles.textContainer}>
-        <Text style={[styles.kcalLeft, { color: isDarkMode ? 'white' : 'black' }]}> 
+        <Text style={[styles.kcalLeft, { color: isDarkMode ? 'white' : 'black' }]}>
           {kcalLeft}
         </Text>
       </View>
