@@ -1,32 +1,20 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
-import { Provider, useDispatch } from 'react-redux';  
+import { Provider, useDispatch } from 'react-redux';
 import store from '../components/redux/store';
-import { loadTotalNutrients, loadSelectedDateSectionsData,loadUserData  } from '../components/redux/diarySlice';
-
+import { loadTotalNutrients, loadUserData } from '../components/redux/diarySlice';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { View, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 SplashScreen.preventAutoHideAsync();
 
-const getTodayDate = () => new Date().toISOString().split('T')[0];
-
-async function checkAndUpdateSelectedDate(dispatch) {
-  const today = getTodayDate();
-  const storedDate = await AsyncStorage.getItem('selectedDate');
-
-  if (!storedDate || storedDate !== today) {
-    console.log(" Cập nhật ngày mới khi mở app:", today);
-    await AsyncStorage.setItem('selectedDate', today);
-    dispatch(loadSelectedDateSectionsData(today)); //  Load dữ liệu ngày mới
-  }
-}
 const LightTheme = {
   ...DefaultTheme,
   colors: {
@@ -35,25 +23,57 @@ const LightTheme = {
   },
 };
 
-//  Tạo component riêng để dùng dispatch
+// 🔥 **BẬT/TẮT TỰ ĐỘNG VÀO ONBOARDING** 🔥
+// 👉 Để debug Onboarding: Đặt `true`
+// 👉 Khi xong, đặt lại thành `false`
+const FORCE_ONBOARDING = true; // << Thay đổi giá trị này khi cần
+
 function AppContent() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const colorScheme = useColorScheme();
+  const [userData, setUserData] = useState(null);
+  const [appReady, setAppReady] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  useEffect(() => {
-    dispatch(loadUserData()); // 🚀 Load userData khi app mở
-  }, []);
-  useEffect(() => {
-    dispatch(loadTotalNutrients()); // 🚀 Load totalNutrients khi app khởi động
 
-    if (loaded) {
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const forceOnboarding = FORCE_ONBOARDING
+          ? true
+          : await AsyncStorage.getItem('forceOnboarding') === 'true';
+
+        if (forceOnboarding) {
+          await AsyncStorage.setItem('forceOnboarding', 'false'); // Reset sau khi debug
+          router.replace('/Onboarding');
+          return;
+        }
+
+        const result = await dispatch(loadUserData());
+        if (!result.payload) {
+          router.replace('/Onboarding');
+        } else {
+          setUserData(result.payload);
+        }
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra Onboarding:", error);
+      }
+      setAppReady(true);
+    };
+
+    checkOnboarding();
+  }, [router.isReady]);
+
+  useEffect(() => {
+    if (loaded && appReady) {
+      dispatch(loadTotalNutrients());
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, appReady]);
 
-  if (!loaded) {
+  if (!loaded || !appReady) {
     return null;
   }
 
@@ -73,7 +93,7 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <Provider store={store}> 
+    <Provider store={store}>
       <AppContent />
     </Provider>
   );

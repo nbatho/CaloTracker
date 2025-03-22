@@ -12,7 +12,7 @@ import * as Progress from 'react-native-progress';
 import { useRouter } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import { saveUserData } from '@/components/redux/diarySlice'; // ✅ Import Redux action
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const OnboardingScreen = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -35,16 +35,19 @@ const OnboardingScreen = () => {
     } else {
       console.log('✅ Onboarding completed! Saving user data...');
       try {
-        const result = await dispatch(saveUserData(userData)); //  Lưu vào Redux và AsyncStorage
+        await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+        const result = await dispatch(saveUserData(userData)); // Đợi lưu xong
+  
         if (saveUserData.fulfilled.match(result)) {
+          console.log('✅ User data saved successfully!');
           setTimeout(() => {
-            router.replace('/'); //  Chuyển về trang chính
+            router.replace('/'); // Chuyển về màn hình chính
           }, 500);
         } else {
-          console.warn(' Lưu userData thất bại:', result.error.message);
+          console.warn('❌ Lưu userData thất bại:', result.error.message);
         }
       } catch (error) {
-        console.error(' Lỗi khi lưu dữ liệu:', error);
+        console.error('❌ Lỗi khi lưu dữ liệu:', error);
       }
     }
   };
@@ -202,7 +205,9 @@ const OnboardingScreen = () => {
         <Text>{page}/{totalPages}</Text>
       </View>
 
-      <ScrollView>{/* Render nội dung của từng trang */}</ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+            {renderPageContent()}
+    </ScrollView>
 
       <TouchableOpacity style={styles.continueButton} onPress={handleNext}>
         <Text style={styles.continueButtonText}>{page === totalPages ? 'Finish & Save' : 'Continue'}</Text>
