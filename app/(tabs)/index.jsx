@@ -166,7 +166,7 @@ export default function HomeScreen() {
                             <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{suppliedKcal}</Text>
                             <Text style={[styles.kcalLabel, { color: isDarkMode ? 'white' : 'gray' }]}>kcal</Text>
                         </View>
-                        <ArcProgress progress={suppliedKcal + burnedKcal } size={180} kcalLeft={TOTAL_KCAL - suppliedKcal - burnedKcal} strokeWidth={15} />
+                        <ArcProgress progress={suppliedKcal } size={180} kcalLeft={TOTAL_KCAL - suppliedKcal + burnedKcal} strokeWidth={15} />
                         <View style={styles.nutritionBox}>
                             {/* Thay đổi icon và label cho Burned */}
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>

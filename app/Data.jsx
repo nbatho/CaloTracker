@@ -180,7 +180,7 @@ const Data = () => {
         </View>
 
         {/* Activity List */}
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {displayedActivities.map((activity) => (
             <TouchableOpacity key={activity.id} style={[styles.activityItem, { backgroundColor: isDarkMode ? '#333333' : 'white' }]} onPress={() => handleActivityPress(activity)}>
               <View style={styles.iconContainer}>

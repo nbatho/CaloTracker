@@ -16,7 +16,7 @@ const CompactCalendar = ({ selectedDate, onDayPress, theme, isDarkMode }) => {
 
     // Bảng màu
     const lightColors = {
-        primary: '#6200EE',
+        primary: '#BB86FC',
         background: '#F5F5F5',
         text: '#212121',
         secondaryText: '#757575',
@@ -124,6 +124,7 @@ const CompactCalendar = ({ selectedDate, onDayPress, theme, isDarkMode }) => {
                     theme={theme}
                     onDayPress={onDayPress}
                     markedDates={{ [selectedDate]: { selected: true, selectedColor: theme.selectedDayBackgroundColor } }}
+                    key={isDarkMode ? 'dark' : 'light'} // Force re-render on theme change
                 />
             </Animated.View>
 

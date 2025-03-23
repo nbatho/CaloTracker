@@ -163,7 +163,7 @@ export default function ProfileScreen() {
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: backgroundColor }]}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.profileHeader}>
                     <BMICircle bmi={bmi} size={140} />
                     <Text style={[styles.status, { color: textColor }]}>{bmiStatus}</Text>

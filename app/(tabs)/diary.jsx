@@ -128,7 +128,7 @@ export default function DiaryScreen() {
     textSectionTitleColor: colors.text,
     dayTextColor: colors.text,
     todayTextColor: colors.primary,
-    selectedDayBackgroundColor: colors.primary,
+    selectedDayBackgroundColor: "#BB86FC",
     selectedDayTextColor: lightColors.surface,
     monthTextColor: colors.text,
     arrowColor: colors.text,
@@ -137,7 +137,7 @@ export default function DiaryScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         {loading ? (
           <ActivityIndicator size="large" color={colors.text} />
         ) : error ? (
