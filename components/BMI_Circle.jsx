@@ -4,8 +4,7 @@ import Svg, { Circle, Path, G, Text as SvgText } from 'react-native-svg';
 
 const BMIGauge = ({ bmi, size = 200 }) => {
   // Set default value if bmi is undefined
-  const bmiValue = typeof bmi === 'number' ? bmi : 22.9;
-
+  const bmiValue = typeof bmi === 'number' ? bmi : 0;
   // Calculate angle for needle based on BMI value
   const getBMIAngle = (bmi) => {
     // Map BMI range (approximately 14-45) to angle range (-150 to 150 degrees)

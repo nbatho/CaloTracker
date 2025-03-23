@@ -29,10 +29,6 @@ const Graph = () => {
   const userData = useSelector(state => state.diary.userData);
   const height = userData?.height || 0;
   const weight = userData?.weight || 0;
-  useEffect(() => {
-    console.log("User Height:", height);
-    console.log("User Weight:", weight);
-  }, [height, weight]);
   // tinh BMI
   const calculateBMI = (weight, height) => {
     if (height > 0) {
@@ -40,7 +36,7 @@ const Graph = () => {
     }
     return 0;
   };
-
+  const BMI = parseFloat(calculateBMI(weight, height));
   useEffect(() => {
     if (!weekData || Object.keys(weekData).length === 0) {
       dispatch(loadWeekData());
@@ -211,7 +207,6 @@ const Graph = () => {
     ]),
     barColors: ["#FF6384", "#36A2EB", "#FFCE56"]
   };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Insights</Text>
@@ -253,7 +248,7 @@ const Graph = () => {
       />
       <Text style={styles.chartTitle}>BMI (kg/m2) </Text>
       <View style={{ alignItems: 'center', marginVertical: 20 }}>
-        <BMICircle bmi={calculateBMI(weight, height)} size={300} />
+        <BMICircle bmi={BMI} size={300} />
       </View>
     </ScrollView>
   );
