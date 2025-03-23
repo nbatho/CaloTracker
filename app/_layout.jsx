@@ -23,17 +23,10 @@ const LightTheme = {
   },
 };
 
-// 🔥 **BẬT/TẮT TỰ ĐỘNG VÀO ONBOARDING** 🔥
-// 👉 Để debug Onboarding: Đặt `true`
-// 👉 Khi xong, đặt lại thành `false`
-const FORCE_ONBOARDING = false; // << Thay đổi giá trị này khi cần
-
 function AppContent() {
   const dispatch = useDispatch();
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const [userData, setUserData] = useState(null);
-  const [appReady, setAppReady] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -41,39 +34,30 @@ function AppContent() {
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
-        const forceOnboarding = FORCE_ONBOARDING
-          ? true
-          : await AsyncStorage.getItem('forceOnboarding') === 'true';
-
-        if (forceOnboarding) {
-          await AsyncStorage.setItem('forceOnboarding', 'false'); // Reset sau khi debug
-          router.replace('/Onboarding');
-          return;
-        }
-
-        const result = await dispatch(loadUserData());
-        if (!result.payload) {
+        const hasCompletedOnboarding = await AsyncStorage.getItem('hasCompletedOnboarding');
+  
+        if (!hasCompletedOnboarding || hasCompletedOnboarding === 'false') {
           router.replace('/Onboarding');
         } else {
-          setUserData(result.payload);
+          // Load dữ liệu người dùng nếu Onboarding đã hoàn tất
+          await dispatch(loadUserData());
         }
       } catch (error) {
         console.error("Lỗi khi kiểm tra Onboarding:", error);
       }
-      setAppReady(true);
     };
-
+  
     checkOnboarding();
-  }, [router.isReady]);
+  }, []);
 
   useEffect(() => {
-    if (loaded && appReady) {
+    if (loaded) {
       dispatch(loadTotalNutrients());
       SplashScreen.hideAsync();
     }
-  }, [loaded, appReady]);
+  }, [loaded]);
 
-  if (!loaded || !appReady) {
+  if (!loaded) {
     return null;
   }
 
