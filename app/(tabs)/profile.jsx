@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, TouchableWithoutFeedback, Keyboard, useColorScheme, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    TextInput,
+    TouchableWithoutFeedback,
+    Keyboard,
+    useColorScheme,
+    ScrollView,
+    Platform,
+} from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Svg, { Circle } from 'react-native-svg';
+import { SafeAreaView } from 'react-native-safe-area-context'; // Đảm bảo nội dung không bị che khuất bởi notch hoặc thanh điều hướng
 
 // Hàm tính chỉ số BMI và trả về cả giá trị và trạng thái
 const calculateBMI = (weight, height) => {
@@ -28,8 +41,8 @@ const calculateBMI = (weight, height) => {
 // Component hiển thị BMI dạng vòng tròn
 const BMICircle = ({ bmi, size = 180 }) => {
     const theme = useColorScheme();
-    const circleColor = theme === 'dark' ? 'lightgreen' : 'green';
-    const fillColor = theme === 'dark' ? '#0F0F0F' : '#F4F4F4';
+    const circleColor = theme === 'dark' ? '#a1ce50ff' : '#a1ce50ff'; // LightGreen/ForestGreen
+    const fillColor = theme === 'dark' ? '#1E1E1E' : '#FFFFFF';
 
     return (
         <View style={[styles.bmiContainer, { width: size, height: size }]}>
@@ -47,19 +60,29 @@ const BMICircle = ({ bmi, size = 180 }) => {
 // Component cho các mục thông tin có thể ấn vào
 const ProfileItem = ({ icon, label, onPress }) => {
     const theme = useColorScheme();
-    const backgroundColor = theme === 'dark' ? '#333' : '#F4F4F4';
-    const textColor = theme === 'dark' ? 'white' : 'black';
-    const iconColor = theme === 'dark' ? 'white' : 'black';
+    const backgroundColor = theme === 'dark' ? '#2C2C2E' : '#FFFFFF';
+    const textColor = theme === 'dark' ? '#F0F0F0' : '#222222';
+    const iconColor = theme === 'dark' ? '#A0A0A0' : '#555555';
+    const borderColor = theme === 'dark' ? '#444444' : '#DDDDDD';
 
-    const labelParts = label.split(': '); // Tách "Activity" và giá trị
+    const labelParts = label.split(': ');
 
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.item, { backgroundColor, flexDirection: 'row', alignItems: 'center' }]}>
-            <FontAwesome5 name={icon} size={24} color={iconColor} style={{ marginRight: 15 }} />
-            <View style={{ flexDirection: 'column' }}>
-                <Text style={[styles.textColor, { color: textColor, fontSize: 18, fontWeight: 'bold' }]}>{labelParts[0]}:</Text>
-                <Text style={[styles.textColor, { color: textColor, fontSize: 14 }]}>{labelParts[1] || 'Chưa chọn'}</Text>
+        <TouchableOpacity
+            onPress={onPress}
+            style={[
+                styles.item,
+                { backgroundColor: backgroundColor, borderColor: borderColor },
+            ]}
+        >
+            <View style={styles.itemContent}>
+                <FontAwesome5 name={icon} size={20} color={iconColor} style={styles.itemIcon} />
+                <View>
+                    <Text style={[styles.itemLabel, { color: textColor }]}>{labelParts[0]}:</Text>
+                    <Text style={[styles.itemValue, { color: textColor }]}>{labelParts[1] || 'Chưa chọn'}</Text>
+                </View>
             </View>
+            <FontAwesome5 name="chevron-right" size={16} color={iconColor} />
         </TouchableOpacity>
     );
 };
@@ -87,8 +110,10 @@ export default function ProfileScreen() {
     const theme = useColorScheme();
     const isDarkMode = theme === 'dark';
 
-    const backgroundColor = isDarkMode ? '#0F0F0F' : '#F4F4F4';
-    const textColor = isDarkMode ? 'white' : 'black';
+    const backgroundColor = isDarkMode ? '#121212' : '#F9F9F9';
+    const textColor = isDarkMode ? '#EEEEEE' : '#333333';
+    const subTextColor = isDarkMode ? '#A0A0A0' : '#666666';
+    const modalBackgroundColor = isDarkMode ? '#2C2C2E' : '#FFFFFF';
 
     // Sử dụng useEffect để tính BMI mỗi khi weight hoặc height thay đổi
     useEffect(() => {
@@ -133,165 +158,174 @@ export default function ProfileScreen() {
     };
 
     const activityOptions = ['Sedentary', 'Low Active', 'Active', 'Very Active'];
+    const genderOptions = ['Male', 'Female', 'Other'];
+    const goalOptions = ['Lose Weight', 'Maintain Weight', 'Gain Weight'];
 
     return (
-        <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>
-            {/* Vòng tròn BMI */}
-            <BMICircle bmi={bmi} size={180} />
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: backgroundColor }]}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <View style={styles.profileHeader}>
+                    <BMICircle bmi={bmi} size={140} />
+                    <Text style={[styles.status, { color: textColor }]}>{bmiStatus}</Text>
+                    <Text style={[styles.risk, { color: subTextColor }]}>
+                        Risk of comorbidities: Average
+                    </Text>
+                </View>
 
-            {/* Trạng thái */}
-            <Text style={[styles.status, { color: textColor }]}>{bmiStatus}</Text>
-            <Text style={[styles.risk, { color: isDarkMode ? 'lightgray' : 'gray' }]}>Risk of comorbidities: Average</Text>
+                <View style={styles.profileItems}>
+                    <ProfileItem
+                        icon="running"
+                        label={`Activity: ${activityLevel || 'Not set'}`}
+                        onPress={() => handlePress('Activity')}
+                    />
+                    <ProfileItem icon="weight" label={`Weight: ${weight || 'Not set'} kg`} onPress={() => handlePress('Weight')} />
+                    <ProfileItem icon="ruler" label={`Height: ${height || 'Not set'} cm`} onPress={() => handlePress('Height')} />
+                    <ProfileItem
+                        icon="bullseye"
+                        label={`Goal: ${weightGoal || 'Not set'}`}
+                        onPress={() => handlePress('Goal')}
+                    />
+                    <ProfileItem icon="birthday-cake" label={`Age: ${age || 'Not set'} years`} onPress={() => handlePress('Age')} />
+                    <ProfileItem
+                        icon="venus-mars"
+                        label={`Gender: ${gender || 'Not set'}`}
+                        onPress={() => handlePress('Gender')}
+                    />
+                </View>
 
-            {/* Các mục thông tin (ấn vào để chỉnh sửa) */}
-            <View style={styles.profileItems}>
-                <ProfileItem
-                    icon="running"
-                    label={`Activity: ${activityLevel || 'Chưa chọn'}`}
-                    onPress={() => handlePress('Activity')}
-                />
-                <ProfileItem icon="weight" label={`Weight: ${weight || 'Chưa nhập'} kg`} onPress={() => handlePress('Weight')} />
-                <ProfileItem icon="ruler" label={`Height: ${height || 'Chưa nhập'} cm`} onPress={() => handlePress('Height')} />
-                <ProfileItem
-                    icon="bullseye"
-                    label={`Goal: ${weightGoal || 'Chưa chọn'}`}
-                    onPress={() => handlePress('Goal')}
-                />
-                <ProfileItem icon="user" label={`Age: ${age || 'Chưa nhập'} tuổi`} onPress={() => handlePress('Age')} />
-                <ProfileItem
-                    icon="venus-mars"
-                    label={`Gender: ${gender || 'Chưa chọn'}`}
-                    onPress={() => handlePress('Gender')}
-                />
-            </View>
+                <Modal visible={isModalVisible} transparent animationType="fade" onRequestClose={handleCloseModal}>
+                    <TouchableWithoutFeedback onPress={handleCloseModal}>
+                        <View style={styles.modalBackground}>
+                            <TouchableWithoutFeedback>
+                                <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#333' : '#FFF' }]}>
+                                    <Text style={[styles.modalTitle, { color: textColor }]}>
+                                        {modalContent === 'Activity' ? 'Chọn mức độ hoạt động' :
+                                            modalContent === 'Gender' ? 'Chọn giới tính' :
+                                                modalContent === 'Goal' ? 'Chọn mục tiêu cân nặng' :
+                                                    `Nhập ${modalContent}`}
+                                    </Text>
 
-            {/* Modal */}
-            <Modal visible={isModalVisible} transparent animationType="fade" onRequestClose={handleCloseModal}>
-                <TouchableWithoutFeedback onPress={handleCloseModal}>
-                    <View style={styles.modalBackground}>
-                        <TouchableWithoutFeedback>
-                            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#333' : '#FFF' }]}>
-                                <Text style={[styles.modalTitle, { color: textColor }]}>
-                                    {modalContent === 'Activity' ? 'Chọn mức độ hoạt động' :
-                                     modalContent === 'Gender' ? 'Chọn giới tính' :
-                                     modalContent === 'Goal' ? 'Chọn mục tiêu cân nặng' :
-                                     `Nhập ${modalContent}`}
-                                </Text>
+                                    {/* Hiển thị các trường nhập liệu tùy theo lựa chọn */}
+                                    {modalContent === 'Weight' && (
+                                        <TextInput
+                                            style={getInputStyle(isDarkMode)}
+                                            placeholder="Nhập cân nặng (kg)"
+                                            placeholderTextColor={isDarkMode ? 'lightgray' : 'gray'}
+                                            keyboardType="numeric"
+                                            value={tempWeight}
+                                            onChangeText={setTempWeight}
+                                        />
+                                    )}
+                                    {modalContent === 'Height' && (
+                                        <TextInput
+                                            style={getInputStyle(isDarkMode)}
+                                            placeholder="Nhập chiều cao (cm)"
+                                            placeholderTextColor={isDarkMode ? 'lightgray' : 'gray'}
+                                            keyboardType="numeric"
+                                            value={tempHeight}
+                                            onChangeText={setTempHeight}
+                                        />
+                                    )}
+                                    {modalContent === 'Age' && (
+                                        <TextInput
+                                            style={getInputStyle(isDarkMode)}
+                                            placeholder="Nhập tuổi"
+                                            placeholderTextColor={isDarkMode ? 'lightgray' : 'gray'}
+                                            keyboardType="numeric"
+                                            value={tempAge}
+                                            onChangeText={setTempAge}
+                                        />
+                                    )}
 
-                                {/* Hiển thị các trường nhập liệu tùy theo lựa chọn */}
-                                {modalContent === 'Weight' && (
-                                    <TextInput
-                                        style={getInputStyle(isDarkMode)}
-                                        placeholder="Nhập cân nặng (kg)"
-                                        placeholderTextColor={isDarkMode ? 'lightgray' : 'gray'}
-                                        keyboardType="numeric"
-                                        value={tempWeight}
-                                        onChangeText={setTempWeight}
-                                    />
-                                )}
-                                {modalContent === 'Height' && (
-                                    <TextInput
-                                        style={getInputStyle(isDarkMode)}
-                                        placeholder="Nhập chiều cao (cm)"
-                                        placeholderTextColor={isDarkMode ? 'lightgray' : 'gray'}
-                                        keyboardType="numeric"
-                                        value={tempHeight}
-                                        onChangeText={setTempHeight}
-                                    />
-                                )}
-                                {modalContent === 'Age' && (
-                                    <TextInput
-                                        style={getInputStyle(isDarkMode)}
-                                        placeholder="Nhập tuổi"
-                                        placeholderTextColor={isDarkMode ? 'lightgray' : 'gray'}
-                                        keyboardType="numeric"
-                                        value={tempAge}
-                                        onChangeText={setTempAge}
-                                    />
-                                )}
+                                    {/* Lựa chọn mức độ hoạt động */}
+                                    {modalContent === 'Activity' && (
+                                        <View style={styles.optionsContainer}>
+                                            {activityOptions.map((level) => (
+                                                <TouchableOpacity
+                                                    key={level}
+                                                    style={[styles.optionButton, { backgroundColor: activityLevel === level ? (isDarkMode ? '#a1ce50ff' : '#a1ce50ff') : 'transparent' }]}
+                                                    onPress={() => handleActivitySelect(level)}
+                                                >
+                                                    <Text style={[styles.optionText, { color: textColor }]}>{level}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    )}
 
-                                {/* Lựa chọn mức độ hoạt động */}
-                                {modalContent === 'Activity' && (
-                                    <View>
-                                        {activityOptions.map((level) => (
-                                            <TouchableOpacity
-                                                key={level}
-                                                style={styles.activityOption}
-                                                onPress={() => handleActivitySelect(level)}
-                                            >
-                                                <Text style={{ color: textColor }}>{level}</Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                )}
+                                    {modalContent === 'Gender' && (
+                                        <View style={styles.optionsContainer}>
+                                            {genderOptions.map((genderOption) => (
+                                                <TouchableOpacity
+                                                    key={genderOption}
+                                                    style={[styles.optionButton, { backgroundColor: gender === genderOption ? (isDarkMode ? '#a1ce50ff' : '#a1ce50ff') : 'transparent' }]}
+                                                    onPress={() => handleGenderSelect(genderOption)}
+                                                >
+                                                    <Text style={[styles.optionText, { color: textColor }]}>{genderOption}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    )}
 
-                                {modalContent === 'Gender' && (
-                                    <View>
-                                        {['male', 'female'].map((genderOption) => (
-                                            <TouchableOpacity
-                                                key={genderOption}
-                                                style={styles.activityOption}
-                                                onPress={() => handleGenderSelect(genderOption)}
-                                            >
-                                                <Text style={{ color: textColor }}>{genderOption}</Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                )}
+                                    {modalContent === 'Goal' && (
+                                        <View style={styles.optionsContainer}>
+                                            {goalOptions.map((goalOption) => (
+                                                <TouchableOpacity
+                                                    key={goalOption}
+                                                    style={[styles.optionButton, { backgroundColor: weightGoal === goalOption ? (isDarkMode ? '#a1ce50ff' : '#a1ce50ff') : 'transparent' }]}
+                                                    onPress={() => handleWeightGoalSelect(goalOption)}
+                                                >
+                                                    <Text style={[styles.optionText, { color: textColor }]}>{goalOption}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    )}
 
-                                {modalContent === 'Goal' && (
-                                    <View>
-                                        {['Lose Weight', 'Maintain Weight', 'Gain Weight'].map((goalOption) => (
-                                            <TouchableOpacity
-                                                key={goalOption}
-                                                style={styles.activityOption}
-                                                onPress={() => handleWeightGoalSelect(goalOption)}
-                                            >
-                                                <Text style={{ color: textColor }}>{goalOption}</Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                )}
-
-                                {/* Nút đóng */}
-                                <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+                                     {/* Nút đóng */}
+                                {/* <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
                                     <Text style={[styles.closeButtonItem, { color: isDarkMode ? 'lightgray' : 'gray' }]}>Đóng</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-        </ScrollView>
+                                </TouchableOpacity> */}
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 // Style cho ô nhập liệu
 const getInputStyle = (isDarkMode) => ({
     width: '100%',
-    height: 40,
+    height: 44,
     borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 20,
-    paddingLeft: 10,
-    color: isDarkMode ? 'white' : 'black',
-    backgroundColor: isDarkMode ? '#222' : '#FFF',
-    borderColor: isDarkMode ? 'lightgray' : 'gray',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    color: isDarkMode ? '#EEEEEE' : '#333333',
+    backgroundColor: isDarkMode ? '#1E1E1E' : '#F2F2F2',
+    borderColor: isDarkMode ? '#444444' : '#DDDDDD',
 });
 
 // Styles
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
+        flex: 1,
+    },
+    scrollContainer: {
         flexGrow: 1,
+        paddingVertical: 24,
+    },
+    profileHeader: {
         alignItems: 'center',
-        paddingTop: 50,
-        paddingBottom: 20,
+        marginBottom: 24,
     },
     bmiContainer: {
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
-        marginBottom: 15,
+        marginBottom: 12,
     },
     textContainer: {
         position: 'absolute',
@@ -304,61 +338,95 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     status: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 10,
+        fontSize: 20,
+        fontWeight: '600',
+        marginTop: 8,
     },
     risk: {
         fontSize: 14,
-        marginBottom: 15,
+        color: 'gray',
+        marginBottom: 16,
     },
     profileItems: {
         width: '100%',
-        marginTop: 10,
+        paddingHorizontal: 24,
     },
     item: {
-        padding: 16,
-        borderRadius: 8,
-        marginVertical: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    itemContent: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    textColor: {
-        fontWeight: 'bold',
+    itemIcon: {
+        marginRight: 16,
+        width: 24,
+    },
+    itemLabel: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    itemValue: {
+        fontSize: 14,
+        marginTop: 4,
     },
     modalBackground: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)', // Thêm background mờ
     },
     modalContent: {
         padding: 20,
         borderRadius: 10,
         width: '80%',
+        backgroundColor: '#a1ce50ff' ,
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 15,
+        textAlign: 'center',
     },
-    input: {
-        width: '100%',
-        height: 40,
-        borderWidth: 1,
-        borderRadius: 5,
-        marginBottom: 20,
-        paddingLeft: 10,
-    },
-    activityOption: {
-        padding: 15,
+    optionItem: {
+        paddingVertical: 14,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
+        alignItems: 'center',
     },
     closeButton: {
         alignItems: 'center',
-        padding: 10,
+        marginTop: 24,
     },
-    closeButtonItem: {
+    closeButtonText: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    optionsContainer: {
+        marginTop: 10,
+    },
+    optionButton: {
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 8,
+        alignItems: 'center',
+    },
+    optionText: {
         fontSize: 16,
     },
+    closeButtonItem: {
+        fontSize: 18,
+        fontWeight: '500',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+    }
+    
 });

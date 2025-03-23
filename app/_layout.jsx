@@ -26,7 +26,7 @@ const LightTheme = {
 // 🔥 **BẬT/TẮT TỰ ĐỘNG VÀO ONBOARDING** 🔥
 // 👉 Để debug Onboarding: Đặt `true`
 // 👉 Khi xong, đặt lại thành `false`
-const FORCE_ONBOARDING = true; // << Thay đổi giá trị này khi cần
+const FORCE_ONBOARDING = false; // << Thay đổi giá trị này khi cần
 
 function AppContent() {
   const dispatch = useDispatch();

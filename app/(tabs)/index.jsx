@@ -31,9 +31,9 @@ export default function HomeScreen() {
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     const burnedKcal = totalNutrients.totalMET || 0;
-    console.log(totalNutrients)
+    // console.log(totalNutrients)
 
-    const scrollY = new Animated.Value(0);
+    const [scrollY] = useState(new Animated.Value(0));
 
     useEffect(() => {
         dispatch(loadTodaySectionsData());
@@ -51,6 +51,14 @@ export default function HomeScreen() {
             }, 300);
         }
     }, [route.params]);
+
+    useEffect(() => {
+        Animated.timing(scrollY, {
+            toValue: scrollY.__getValue(), // Giữ nguyên giá trị hiện tại
+            duration: 0,
+            useNativeDriver: true,
+        }).start();
+    }, [todaySelection]);
 
     const handleMealSelection = (meal) => {
         if (selectedItem) {
@@ -286,17 +294,17 @@ export default function HomeScreen() {
 
             {/* Modal xác nhận xóa */}
             <Modal animationType="slide" transparent={true} visible={modalVisible}>
-                <View style={styles.modalContainer}>
-                    <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#333333' : '#FFFFFF' }]}>
-                        <Text style={{ color: isDarkMode ? 'white' : 'black', fontSize: 16, marginBottom: 10 }}>
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? '#222222' : '#FFFFFF' }]}>
+                        <Text style={[styles.modalText, { color: isDarkMode ? 'white' : 'black' }]}>
                             Do you want to delete "{selectedItem?.name}"?
                         </Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                            <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.modalButton, { backgroundColor: isDarkMode ? '#444444' : '#DDDDDD' }]}>
-                                <Text style={{ color: isDarkMode ? 'white' : 'black' }}>Cancel </Text>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.modalButton, { backgroundColor: isDarkMode ? '#555555' : '#EEEEEE' }]}>
+                                <Text style={{ color: isDarkMode ? 'white' : 'black', fontWeight: 'bold' }}>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
-                                <Text style={{ color: 'white' }}>Delete </Text>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Delete</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -350,10 +358,15 @@ const styles = StyleSheet.create({
         fontWeight: '100',
     },
     modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
+        width: '80%',
+        padding: 20,
+        borderRadius: 15, // Bo góc modal
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)'
+        elevation: 5, // Hiệu ứng đổ bóng
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
 
     },
     modalContent: {
@@ -363,11 +376,11 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     modalButton: {
-        padding: SPACING / 2,
-        margin: SPACING / 4,
-        borderRadius: 5,
+        flex: 1,
+        padding: 12,
+        borderRadius: 10, // Bo góc nút
         alignItems: 'center',
-        width: 100,
+        marginHorizontal: 5,
     },
     cameraButton: {
         position: 'absolute',
@@ -482,5 +495,17 @@ const styles = StyleSheet.create({
         marginLeft: 0, // Giảm hoặc loại bỏ khoảng cách nếu cần
         letterSpacing: -2, // Điều chỉnh khoảng cách giữa các ký tự nếu cần
         fontSize: 11,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Hiệu ứng mờ nền
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

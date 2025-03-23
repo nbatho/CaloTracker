@@ -1,4 +1,4 @@
-// DiaryScreen.jsx
+// diary.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, ActivityIndicator, Platform, StyleSheet,
@@ -7,15 +7,42 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector, Provider } from 'react-redux';
 import { deleteItemFromSection, loadSelectedDateSectionsData } from '@/components/redux/diarySlice';
-import { Calendar } from 'react-native-calendars';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useNavigation, useRoute, useNavigationState  } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, useNavigationState } from '@react-navigation/native';
 import store from '@/components/redux/store';
+import CompactCalendar from '@/components/redux/CompactCalendar'; // Import CompactCalendar
 
 const { height, width } = Dimensions.get('window');
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
+
+// Bảng màu
+const lightColors = {
+  primary: '#6200EE',
+  background: '#F5F5F5',
+  text: '#212121',
+  secondaryText: '#757575',
+  accent: '#03DAC5',
+  surface: '#FFFFFF',
+  error: '#B00020',
+  card: '#FFFFFF',
+  shadow: '#000',
+  border: '#CCCCCC', // Thêm màu border cho light mode
+};
+
+const darkColors = {
+  primary: '#BB86FC',
+  background: '#121212',
+  text: '#FFFFFF',
+  secondaryText: '#BDBDBD',
+  accent: '#03DAC5',
+  surface: '#212121',
+  error: '#CF6679',
+  card: '#333333',
+  shadow: '#FFFFFF',
+  border: '#555555', // Thêm màu border cho dark mode
+};
 
 export default function DiaryScreen() {
   const dispatch = useDispatch();
@@ -25,18 +52,19 @@ export default function DiaryScreen() {
   const { loading, error, selectedDateSectionsData } = useSelector((state) => state.diary);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
+  const colors = isDarkMode ? darkColors : lightColors;
 
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const navigationState = useNavigationState((state) => state);
+
   useEffect(() => {
     if (!navigationState) return;
 
     const currentRoute = navigationState.routes[navigationState.index].name;
     if (currentRoute !== "Diary") {
-      // console.log(" Rời khỏi Diary, reset về ngày hôm nay");
       setSelectedDate(getTodayDate());
       AsyncStorage.setItem('selectedDate', getTodayDate());
     }
@@ -50,7 +78,6 @@ export default function DiaryScreen() {
         const storedDate = await AsyncStorage.getItem('selectedDate');
 
         if (storedDate !== today) {
-          // console.log(" Diary được mở, cập nhật ngày hiện tại");
           setSelectedDate(today);
           await AsyncStorage.setItem('selectedDate', today);
         }
@@ -73,12 +100,12 @@ export default function DiaryScreen() {
     setModalVisible(false);
   };
 
-  const renderItemContent = (section, item, isDarkMode) => {
+  const renderItemContent = (section, item) => {
     if (section === "Activity") {
       return (
         <View style={{ alignItems: 'center' }}>
-          <FontAwesome5 name={item.icon} size={30} color={isDarkMode ? 'white' : 'black'} />
-          <Text style={{ color: isDarkMode ? 'white' : 'black', fontSize: 12 }}>{item.name}</Text>
+          <FontAwesome5 name={item.icon} size={24} color={colors.text} />
+          <Text style={[styles.itemText, { color: colors.text }]}>{item.name}</Text>
         </View>
       );
     } else if (item.image_url) {
@@ -86,49 +113,49 @@ export default function DiaryScreen() {
         <Image
           source={{ uri: item.image_url }}
           style={styles.foodImage}
-          onError={(error) => console.log(" Image Load Error:", error.nativeEvent)}
+          onError={(error) => console.log("Image Load Error:", error.nativeEvent)}
         />
       );
     } else {
       return (
-        <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{item.name}</Text>
+        <Text style={[styles.itemText, { color: colors.text }]}>{item.name}</Text>
       );
     }
   };
 
-  const backgroundColor = isDarkMode ? '#121212' : '#fff';
-  const textColor = isDarkMode ? '#ffffff' : '#000000';
+  const calendarTheme = {
+    calendarBackground: colors.background,
+    textSectionTitleColor: colors.text,
+    dayTextColor: colors.text,
+    todayTextColor: colors.primary,
+    selectedDayBackgroundColor: colors.primary,
+    selectedDayTextColor: lightColors.surface,
+    monthTextColor: colors.text,
+    arrowColor: colors.text,
+    textDisabledColor: colors.secondaryText,
+  };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]} showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <ScrollView contentContainerStyle={styles.container}>
         {loading ? (
-          <ActivityIndicator size="large" color={textColor} />
+          <ActivityIndicator size="large" color={colors.text} />
         ) : error ? (
-          <Text style={[styles.error, { color: textColor }]}>{error}</Text>
+          <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
         ) : (
           <>
-            <View style={styles.calendarWrapper}>
-              <Calendar
-                style={styles.calendar}
-                theme={{
-                  calendarBackground: backgroundColor,
-                  textSectionTitleColor: textColor,
-                  dayTextColor: textColor,
-                  todayTextColor: isDarkMode ? '#ff8c00' : '#ff4500',
-                  selectedDayBackgroundColor: isDarkMode ? '#555' : '#007bff',
-                  selectedDayTextColor: '#ffffff',
-                  monthTextColor: textColor,
-                  arrowColor: textColor,
-                }}
+            <View style={[styles.calendarWrapper, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}>
+              <CompactCalendar
+                selectedDate={selectedDate}
                 onDayPress={handleDayPress}
-                markedDates={{ [selectedDate]: { selected: true, selectedColor: 'blue' } }}
+                theme={calendarTheme}
+                isDarkMode={isDarkMode}
               />
             </View>
 
-            <View style={styles.selectedDateContainer}>
-              <Text style={[styles.selectedDateText, { color: textColor }]}>
-                Selected Date: {new Date(selectedDate).toLocaleDateString('en-US', {
+            <View style={[styles.selectedDateContainer, { backgroundColor: colors.card, shadowColor: colors.shadow, elevation: 3 }]}>
+              <Text style={[styles.selectedDateText, { color: colors.text }]}>
+                {new Date(selectedDate).toLocaleDateString('en-US', {
                   month: 'long', day: 'numeric', year: 'numeric'
                 })}
               </Text>
@@ -136,39 +163,39 @@ export default function DiaryScreen() {
 
             {Object.keys(selectedDateSectionsData).map((section, index) => (
               <View key={index} style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: textColor }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
                   <FontAwesome5 name={
                     section === "Activity" ? "running" :
-                    section === "Breakfast" ? "bread-slice" :
-                    section === "Lunch" ? "hamburger" :
-                    section === "Dinner" ? "utensils" : "cookie"
-                  } size={16} color={textColor} /> {" "}
+                      section === "Breakfast" ? "bread-slice" :
+                        section === "Lunch" ? "hamburger" :
+                          section === "Dinner" ? "utensils" : "cookie"
+                  } size={16} color={colors.text} /> {" "}
                   {section}
                 </Text>
 
-                <View style={styles.dataContainer}>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.dataContainer}>
                   {selectedDateSectionsData[section].length > 0 ? (
                     selectedDateSectionsData[section].map((item, idx) => (
                       <TouchableOpacity
                         key={idx}
-                        style={styles.dataItem}
+                        style={[styles.dataItem, { backgroundColor: colors.card, shadowColor: colors.shadow, elevation: 2 }]}
                         onLongPress={() => {
                           setSelectedItem(item);
                           setSelectedSection(section);
                           setModalVisible(true);
                         }}
                       >
-                        {renderItemContent(section, item, isDarkMode)}
+                        {renderItemContent(section, item)}
                       </TouchableOpacity>
                     ))
                   ) : (
-                    <View style={styles.dataItem}>
-                    <Text style={[styles.noDataText, { color: isDarkMode ? 'white' : 'black' }]}>
-                      No Data
-                    </Text>
-                  </View>
+                    <View style={[styles.dataItem, { backgroundColor: colors.card }]}>
+                      <Text style={[styles.noDataText, { color: colors.secondaryText }]}>
+                        No Data
+                      </Text>
+                    </View>
                   )}
-                </View>
+                </ScrollView>
               </View>
             ))}
           </>
@@ -177,16 +204,16 @@ export default function DiaryScreen() {
 
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={{ color: 'black', fontSize: 16, marginBottom: 10 }}>
-              Do you want to delete "{selectedItem?.name}"?
+          <View style={[styles.modalContent, { backgroundColor: colors.card, shadowColor: colors.shadow, elevation: 5 }]}>
+            <Text style={[styles.modalText, { color: colors.text }]}>
+              Delete "{selectedItem?.name}"?
             </Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
-                <Text style={{ color: 'black' }}>Cancel</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.modalButton, { backgroundColor: colors.card }]}>
+                <Text style={{ color: colors.text }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
-                <Text style={{ color: 'white' }}>Delete</Text>
+              <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: colors.error }]}>
+                <Text style={{ color: lightColors.surface }}>Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -197,36 +224,106 @@ export default function DiaryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, paddingBottom: 20 },
-  calendarWrapper: { height: height * 0.4, justifyContent: 'center', alignItems: 'center' },
-  calendar: { width: width * 0.95, borderRadius: 10, overflow: 'hidden', alignSelf: 'center' },
-  selectedDateContainer: { marginTop: 10, padding: 10, borderRadius: 8, alignSelf: 'center', width: width * 0.9, alignItems: 'center' },
-  selectedDateText: { fontSize: 18, fontWeight: 'bold' },
-  section: { marginVertical: 8, padding: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold' },
-  dataContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
-  dataItem: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
-  plusButton: { width: 80, height: 80, borderRadius: 10, borderWidth: 1, borderColor: 'gray', alignItems: 'center', justifyContent: 'center' },
-  plus: { fontSize: 30, fontWeight: 'bold' },
-  modalContent: {
-    width: 250, backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center'
+  container: { flexGrow: 1, paddingBottom: 20, paddingTop: 20, paddingHorizontal: 16 },
+  calendarWrapper: {
+    marginTop: 20,
+    borderRadius: 12,
+    overflow: 'hidden', // Important for rounded corners to work correctly
+    // borderColor: '#ccc',   // Thêm border mặc định
+    // borderWidth: 1,
+    padding: 5,
   },
-  modalContainer: {
-    flex: 1, justifyContent: 'center', alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)'
-  },
-  modalButtons: { flexDirection: 'row', marginTop: 10 },
-  modalButton: { padding: 10, margin: 5, borderRadius: 5, alignItems: 'center', width: 80 },
-  foodImage: {
-    width: 75,
-    height: 75,
+  selectedDateContainer: {
+    marginTop: 20,
+    padding: 12,
     borderRadius: 10,
-    resizeMode: 'cover'
+    alignSelf: 'center',
+    width: '90%',
+    alignItems: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  selectedDateText: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  section: {
+    marginVertical: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  dataContainer: {
+    flexDirection: 'row',
+  },
+  dataItem: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
+    borderWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    padding: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  itemText: {
+    fontSize: 14,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  foodImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 10,
+    resizeMode: 'cover',
   },
   noDataText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontStyle: 'italic',
     textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  error: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
