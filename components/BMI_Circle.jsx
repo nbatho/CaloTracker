@@ -76,7 +76,7 @@ const BMIGauge = ({ bmi, size = 200 }) => {
     { category: 'Obese Class III', color: '#8B0000', range: 'BMI ≥ 40.0' }
   ];
   
-  // Pre-calculate tick marks to avoid potential issues with inline text in .map()
+  // Pre-calculate tick marks
   const tickMarks = [];
   for (let i = 0; i < 31; i++) {
     const angle = -150 + i * 10;
@@ -85,6 +85,7 @@ const BMIGauge = ({ bmi, size = 200 }) => {
     const y1 = 50 + 40 * Math.sin(radian);
     const x2 = 50 + 35 * Math.cos(radian);
     const y2 = 50 + 35 * Math.sin(radian);
+    
     tickMarks.push(
       <Path
         key={`tick-${i}`}
@@ -106,24 +107,23 @@ const BMIGauge = ({ bmi, size = 200 }) => {
       </View>
       
       <View style={[styles.gaugeContainer, { width: size, height: size/2 + 50 }]}>
-        <Svg width={size} height={size/2 + 20} viewBox="0 0 100 70">
+      <Svg width={size} height={size/2 + 20} viewBox="0 0 100 70">
           {/* Draw the colored arcs */}
-          {drawArc(-150, -120, '#007bff')} {/* Very severely underweight */}
-          {drawArc(-120, -90, '#00bfff')}  {/* Severely underweight */}
-          {drawArc(-90, -30, '#20B2AA')}   {/* Underweight */}
-          {drawArc(-30, 50, '#32CD32')}    {/* Normal */}
-          {drawArc(50, 90, '#FFA500')}     {/* Overweight */}
-          {drawArc(90, 120, '#FF4500')}    {/* Obese Class I */}
-          {drawArc(120, 150, '#FF0000')}   {/* Obese Class II */}
+          {drawArc(-150, -120, '#007bff')} 
+          {drawArc(-120, -90, '#00bfff')}  
+          {drawArc(-90, -30, '#20B2AA')}   
+          {drawArc(-30, 50, '#32CD32')}    
+          {drawArc(50, 90, '#FFA500')}     
+          {drawArc(90, 120, '#FF4500')}    
+          {drawArc(120, 150, '#FF0000')}   
           
-          {/* Small tick marks - changed to use pre-calculated array */}
+          {/* Small tick marks */}
           <G>
             {tickMarks}
           </G>
           
           {/* Needle with glow effect */}
           <G transform={`rotate(${needleAngle}, 50, 50)`}>
-            {/* Glow effect */}
             <Circle cx="50" cy="50" r="7" fill={bmiInfo.color} opacity={0.4} />
             <Path
               d="M 50 15 L 53 50 L 50 55 L 47 50 Z"
@@ -133,13 +133,6 @@ const BMIGauge = ({ bmi, size = 200 }) => {
             />
             <Circle cx="50" cy="50" r="4" fill="#FFFFFF" stroke={bmiInfo.color} strokeWidth="1" />
           </G>
-          
-          {/* Add BMI markers with SvgText */}
-          <SvgText x="10" y="50" fontSize="3" fill="#666666" textAnchor="middle">16</SvgText>
-          <SvgText x="20" y="30" fontSize="3" fill="#666666" textAnchor="middle">18.5</SvgText>
-          <SvgText x="50" y="15" fontSize="3" fill="#666666" textAnchor="middle">25</SvgText>
-          <SvgText x="80" y="30" fontSize="3" fill="#666666" textAnchor="middle">30</SvgText>
-          <SvgText x="90" y="50" fontSize="3" fill="#666666" textAnchor="middle">40</SvgText>
         </Svg>
         
         {/* Display BMI value below the SVG */}
