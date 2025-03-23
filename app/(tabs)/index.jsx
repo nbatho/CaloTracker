@@ -32,7 +32,11 @@ export default function HomeScreen() {
     const suppliedKcal = totalNutrients.energy || 0;
     const burnedKcal = totalNutrients.totalMET || 0;
     // console.log(totalNutrients)
+    const userData = useSelector(state => state.diary.userData);
 
+    useEffect(() => {
+        console.log("User Data:", userData);
+    }, [userData]);
     const [scrollY] = useState(new Animated.Value(0));
 
     useEffect(() => {
