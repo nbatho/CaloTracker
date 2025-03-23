@@ -30,13 +30,22 @@ export default function HomeScreen() {
     const TOTAL_KCAL = 2147;
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
-    const burnedKcal = totalNutrients.totalMET || 0;
     // console.log(totalNutrients)
     const userData = useSelector(state => state.diary.userData);
 
+    // Lấy giá trị height và weight từ userData, có kiểm tra nếu dữ liệu chưa có
+    const height = userData?.height || 0;
+    const weight = userData?.weight || 0;
+    const time = 1; // gio 
+    const burnedKcal = totalNutrients.totalMET * weight * 1|| 0;
     useEffect(() => {
         console.log("User Data:", userData);
     }, [userData]);
+
+    // useEffect(() => {
+    //     console.log("Height:", height);
+    //     console.log("Weight:", weight);
+    // }, [height, weight]);
     const [scrollY] = useState(new Animated.Value(0));
 
     useEffect(() => {

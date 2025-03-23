@@ -11,7 +11,7 @@ import {
 import { BarChart, StackedBarChart } from "react-native-chart-kit";
 import { useDispatch, useSelector } from "react-redux";
 import { loadWeekData, loadMonthData, loadYearData } from "@/components/redux/diarySlice";
-
+import BMICircle from "@/components/BMI_Circle";
 const screenWidth = Dimensions.get("window").width;
 
 const Graph = () => {
@@ -24,6 +24,22 @@ const Graph = () => {
   const weekData = useSelector((state) => state.diary.weekData);
   const monthData = useSelector((state) => state.diary.monthData);
   const yearData = useSelector((state) => state.diary.yearData);
+
+  // weight, height
+  const userData = useSelector(state => state.diary.userData);
+  const height = userData?.height || 0;
+  const weight = userData?.weight || 0;
+  useEffect(() => {
+    console.log("User Height:", height);
+    console.log("User Weight:", weight);
+  }, [height, weight]);
+  // tinh BMI
+  const calculateBMI = (weight, height) => {
+    if (height > 0) {
+      return (weight / ((height / 100) ** 2)).toFixed(1);
+    }
+    return 0;
+  };
 
   useEffect(() => {
     if (!weekData || Object.keys(weekData).length === 0) {
@@ -235,6 +251,10 @@ const Graph = () => {
         chartConfig={chartConfig}
         style={styles.chart}
       />
+      <Text style={styles.chartTitle}>BMI (kg/m2) </Text>
+      <View style={{ alignItems: 'center', marginVertical: 20 }}>
+        <BMICircle bmi={calculateBMI(weight, height)} size={300} />
+      </View>
     </ScrollView>
   );
 };
