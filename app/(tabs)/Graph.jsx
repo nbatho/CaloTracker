@@ -34,12 +34,14 @@ const Graph = () => {
     console.log("User Weight:", weight);
   }, [height, weight]);
   // tinh BMI
+ 
   const calculateBMI = (weight, height) => {
     if (height > 0) {
       return (weight / ((height / 100) ** 2)).toFixed(1);
     }
     return 0;
-  };
+  };  
+  const BMI = parseFloat(calculateBMI(weight, height));
 
   useEffect(() => {
     if (!weekData || Object.keys(weekData).length === 0) {
@@ -253,7 +255,7 @@ const Graph = () => {
       />
       {/*<Text style={styles.chartTitle}>BMI (kg/m2) </Text>*/}
       <View style={[styles.bmiContainer, styles.chart]}>
-        <BMICircle bmi={calculateBMI(weight, height)} size={300} />
+        <BMICircle bmi={BMI} size={300} />
       </View>
     </ScrollView>
   );
