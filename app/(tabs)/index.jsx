@@ -17,36 +17,87 @@ export default function HomeScreen() {
     const route = useRoute();
     const theme = useColorScheme();
     const isDarkMode = theme === 'dark';
+    const [scrollY] = useState(new Animated.Value(0));
+    const [modalVisible, setModalVisible] = useState(false);
 
     const todaySelection = useSelector(state => state.diary.todaySectionsData);
     const totalNutrients = useSelector(state => state.diary.totalNutrients);
 
     const [selectedItem, setSelectedItem] = useState(null);
-
     const [selectedSection, setSelectedSection] = useState(null);
-    const [modalVisible, setModalVisible] = useState(false);
     const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
 
-    const TOTAL_KCAL = 2147;
+    // user
+    const [TOTAL_KCAL, setTOTAL_KCAL] = useState(0);
+
+    useEffect(() => {
+        if (userData) {
+            setTOTAL_KCAL(calculateTDEE(userData));
+        }
+    }, [userData]);
+
+    console.log("TOTAL_KCAL (TDEE):", TOTAL_KCAL);
+
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     // console.log(totalNutrients)
     const userData = useSelector(state => state.diary.userData);
-
+    const gender = userData?.gender || "unknown";
+    const activityLevel = userData?.activityLevel || "unknown";
     // Lấy giá trị height và weight từ userData, có kiểm tra nếu dữ liệu chưa có
     const height = userData?.height || 0;
     const weight = userData?.weight || 0;
     const time = 1; // gio 
     const burnedKcal = totalNutrients.totalMET * weight * 1|| 0;
-    // useEffect(() => {
-    //     console.log("User Data:", userData);
-    // }, [userData]);
+    useEffect(() => {
+        if (userData && userData.weight && userData.height) {
+            setTOTAL_KCAL(calculateTDEE(userData));
+        }
+    }, [userData]);
+    const calculateTDEE = (userData) => {
+        if (!userData) return 0; // Tránh lỗi nếu userData không tồn tại
+    
+        const { gender, weight, height, birthday, activityLevel } = userData;
+    
+        // Tính tuổi từ ngày sinh
+        const birthYear = parseInt(birthday?.year, 10);
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - birthYear;
+    
+        // Kiểm tra dữ liệu hợp lệ
+        if (!weight || !height || !age || !gender || !activityLevel) return 0;
+    
+        // Tính BMR dựa trên giới tính
+        let BMR;
+        if (gender === "male") {
+            BMR = 10 * weight + 6.25 * height - 5 * age + 5;
+        } else if (gender === "female") {
+            BMR = 10 * weight + 6.25 * height - 5 * age - 161;
+        } else {
+            return 0; // Trường hợp giới tính không hợp lệ
+        }
+    
+        // Hệ số hoạt động
+        const activityMultipliers = {
+            sedentary: 1.2,
+            light: 1.375,
+            moderate: 1.55,
+            active: 1.725,
+            very_active: 1.9,
+        };
+    
+        const activityFactor = activityMultipliers[activityLevel] || 1.2; // Mặc định nếu không có giá trị hợp lệ
+    
+        // Tính TDEE
+        const TDEE = Math.round(BMR * activityFactor);
+        return TDEE;
+    };
+    
+    useEffect(() => {
+        console.log("User Data:", userData);
+    }, [userData]);
+    
 
-    // useEffect(() => {
-    //     console.log("Height:", height);
-    //     console.log("Weight:", weight);
-    // }, [height, weight]);
-    const [scrollY] = useState(new Animated.Value(0));
 
     useEffect(() => {
         dispatch(loadTodaySectionsData());

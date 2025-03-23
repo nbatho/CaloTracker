@@ -167,10 +167,28 @@ const OnboardingScreen = () => {
               <Text style={styles.goalButtonText}>Sedentary</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={[styles.goalButton, userData.activityLevel === 'light' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'light' })}
+            >
+              <Text style={styles.goalButtonText}>Light </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.goalButton, userData.activityLevel === 'moderate' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'moderate' })}
+            >
+              <Text style={styles.goalButtonText}>Moderate </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[styles.goalButton, userData.activityLevel === 'active' && styles.selectedGoalButton]}
               onPress={() => setUserData({ ...userData, activityLevel: 'active' })}
             >
               <Text style={styles.goalButtonText}>Active</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.goalButton, userData.activityLevel === 'very_active' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'very_active' })}
+            >
+              <Text style={styles.goalButtonText}>Very active</Text>
             </TouchableOpacity>
           </View>
         );

@@ -15,7 +15,9 @@ import {
 import { FontAwesome5 } from '@expo/vector-icons';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context'; // Đảm bảo nội dung không bị che khuất bởi notch hoặc thanh điều hướng
-
+import { useSelector, useDispatch } from 'react-redux';
+import { saveUserData } from '@/components/redux/diarySlice'; // Import action cập nhật Redux
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // Hàm tính chỉ số BMI và trả về cả giá trị và trạng thái
 const calculateBMI = (weight, height) => {
     if (!weight || !height || height === 0) return { bmi: "N/A", status: "N/A" };
@@ -89,14 +91,16 @@ const ProfileItem = ({ icon, label, onPress }) => {
 
 // Màn hình Profile
 export default function ProfileScreen() {
+    const dispatch = useDispatch();
+    const userData = useSelector(state => state.diary.userData) || {};
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalContent, setModalContent] = useState(null);
-    const [weight, setWeight] = useState("");
-    const [height, setHeight] = useState("");
-    const [activityLevel, setActivityLevel] = useState("");
-    const [age, setAge] = useState("");
-    const [gender, setGender] = useState("");
-    const [weightGoal, setWeightGoal] = useState("");
+    const [weight, setWeight] = useState(userData.weight?.toString() || "");
+    const [height, setHeight] = useState(userData.height?.toString() || "");
+    const [age, setAge] = useState(userData.birthday?.year ? (new Date().getFullYear() - parseInt(userData.birthday.year)).toString() : "");
+    const [activityLevel, setActivityLevel] = useState(userData.activityLevel || "");
+    const [gender, setGender] = useState(userData.gender || "");
+    const [weightGoal, setWeightGoal] = useState(userData.goal?.toString() || "");
 
     // State tạm thời để lưu giá trị trong modal
     const [tempWeight, setTempWeight] = useState("");
@@ -115,6 +119,16 @@ export default function ProfileScreen() {
     const subTextColor = isDarkMode ? '#A0A0A0' : '#666666';
     const modalBackgroundColor = isDarkMode ? '#2C2C2E' : '#FFFFFF';
 
+    const updateUserData = async (updatedData) => {
+        try {
+            const newUserData = { ...userData, ...updatedData };
+            await AsyncStorage.setItem('userData', JSON.stringify(newUserData)); //  Lưu vào AsyncStorage
+            dispatch(saveUserData(newUserData)); //  Cập nhật Redux
+        } catch (error) {
+            console.error("❌ Lỗi khi lưu userData:", error);
+        }
+    };
+    
     // Sử dụng useEffect để tính BMI mỗi khi weight hoặc height thay đổi
     useEffect(() => {
         const { bmi: calculatedBmi, status: calculatedStatus } = calculateBMI(parseFloat(weight), parseFloat(height));
@@ -135,27 +149,44 @@ export default function ProfileScreen() {
     const handleCloseModal = () => {
         setModalVisible(false);
         Keyboard.dismiss();
-
-        // Cập nhật state chính khi đóng modal
-        if (modalContent === 'Weight') setWeight(tempWeight);
-        if (modalContent === 'Height') setHeight(tempHeight);
-        if (modalContent === 'Age') setAge(tempAge);
+    
+        let updatedField = {};
+        if (modalContent === 'Weight') {
+            setWeight(tempWeight);
+            updatedField = { weight: parseFloat(tempWeight) };
+        }
+        if (modalContent === 'Height') {
+            setHeight(tempHeight);
+            updatedField = { height: parseFloat(tempHeight) };
+        }
+        if (modalContent === 'Age') {
+            setAge(tempAge);
+            updatedField = { birthday: { ...userData.birthday, year: (new Date().getFullYear() - parseInt(tempAge)).toString() } };
+        }
+    
+        updateUserData(updatedField); // Cập nhật Redux & AsyncStorage
     };
+    
 
     const handleActivitySelect = (level) => {
+        // console.log("🔹 Đã chọn activityLevel:", level);
         setActivityLevel(level);
-        handleCloseModal();
+        updateUserData({ activityLevel: level });
+        setModalVisible(false);
     };
 
     const handleGenderSelect = (selectedGender) => {
         setGender(selectedGender);
+        updateUserData({ gender: selectedGender });
         handleCloseModal();
     };
 
     const handleWeightGoalSelect = (goal) => {
         setWeightGoal(goal);
+        updateUserData({ goal: goal });
         handleCloseModal();
     };
+    
 
     const activityOptions = ['Sedentary', 'Low Active', 'Active', 'Very Active'];
     const genderOptions = ['Male', 'Female', 'Other'];
