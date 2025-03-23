@@ -38,9 +38,9 @@ export default function HomeScreen() {
     const weight = userData?.weight || 0;
     const time = 1; // gio 
     const burnedKcal = totalNutrients.totalMET * weight * 1|| 0;
-    useEffect(() => {
-        console.log("User Data:", userData);
-    }, [userData]);
+    // useEffect(() => {
+    //     console.log("User Data:", userData);
+    // }, [userData]);
 
     // useEffect(() => {
     //     console.log("Height:", height);

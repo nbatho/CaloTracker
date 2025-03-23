@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -27,40 +27,42 @@ function AppContent() {
   const dispatch = useDispatch();
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const navigationState = useRootNavigationState(); // Kiểm tra router đã sẵn sàng
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   useEffect(() => {
+    if (!navigationState?.key || !loaded) return; // Chỉ chạy khi router đã sẵn sàng và font đã load
+
     const checkOnboarding = async () => {
       try {
+        await SplashScreen.hideAsync(); // Đảm bảo SplashScreen đã ẩn trước khi chuyển trang
+
         const hasCompletedOnboarding = await AsyncStorage.getItem('hasCompletedOnboarding');
-  
+        console.log("Trạng thái Onboarding:", hasCompletedOnboarding);
+
         if (!hasCompletedOnboarding || hasCompletedOnboarding === 'false') {
+          console.log("🚀 Chuyển đến Onboarding (do chưa hoàn tất)");
           router.replace('/Onboarding');
-        } else {
-          // Load dữ liệu người dùng nếu Onboarding đã hoàn tất
-          await dispatch(loadUserData());
+          return;
+        }
+
+        // Load dữ liệu người dùng
+        const userData = await dispatch(loadUserData()).unwrap();
+        console.log("📌 Dữ liệu userData sau khi load:", userData);
+
+        if (!userData) {
+          console.log("🚀 Chuyển đến Onboarding (do userData null)");
+          router.replace('/Onboarding');
         }
       } catch (error) {
-        console.error("Lỗi khi kiểm tra Onboarding:", error);
+        console.error("❌ Lỗi khi kiểm tra Onboarding:", error);
       }
     };
-  
+
     checkOnboarding();
-  }, []);
-
-  useEffect(() => {
-    if (loaded) {
-      dispatch(loadTotalNutrients());
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+  }, [navigationState?.key, loaded]);
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
       <View style={styles.container}>
