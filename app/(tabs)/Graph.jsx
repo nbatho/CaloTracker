@@ -29,6 +29,10 @@ const Graph = () => {
   const userData = useSelector(state => state.diary.userData);
   const height = userData?.height || 0;
   const weight = userData?.weight || 0;
+  useEffect(() => {
+    console.log("User Height:", height);
+    console.log("User Weight:", weight);
+  }, [height, weight]);
   // tinh BMI
   const calculateBMI = (weight, height) => {
     if (height > 0) {
@@ -36,7 +40,7 @@ const Graph = () => {
     }
     return 0;
   };
-  const BMI = parseFloat(calculateBMI(weight, height));
+
   useEffect(() => {
     if (!weekData || Object.keys(weekData).length === 0) {
       dispatch(loadWeekData());
@@ -207,8 +211,9 @@ const Graph = () => {
     ]),
     barColors: ["#FF6384", "#36A2EB", "#FFCE56"]
   };
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
       <Text style={styles.header}>Insights</Text>
 
       {/* Tabs */}
@@ -246,9 +251,9 @@ const Graph = () => {
         chartConfig={chartConfig}
         style={styles.chart}
       />
-      <Text style={styles.chartTitle}>BMI (kg/m2) </Text>
-      <View style={{ alignItems: 'center', marginVertical: 20 }}>
-        <BMICircle bmi={BMI} size={300} />
+      {/*<Text style={styles.chartTitle}>BMI (kg/m2) </Text>*/}
+      <View style={[styles.bmiContainer, styles.chart]}>
+        <BMICircle bmi={calculateBMI(weight, height)} size={300} />
       </View>
     </ScrollView>
   );
@@ -275,6 +280,18 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 16, fontWeight: "bold", color: "#a1ce50ff" },
   tabTextSelected: { color: "#fff" },
   chart: { borderRadius: 10 },
+  bmiContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+    backgroundColor: '#fff', // Added white background
+    padding: 15,            // Added padding for spacing
+    borderRadius: 10,       // Keep the border radius
+    shadowColor: '#000',    // Optional: Add shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,           // For Android shadow
+  }
 });
 
 export default Graph;

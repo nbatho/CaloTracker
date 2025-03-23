@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     fontSize: 16,
-    fontStyle: 'italic',
+    //fontStyle: 'italic',
     textAlign: 'center',
   },
   modalContainer: {
