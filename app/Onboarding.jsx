@@ -87,17 +87,17 @@ const OnboardingScreen = () => {
             <TouchableOpacity
               style={[
                 styles.genderButton,
-                userData.gender === 'male' && styles.selectedButton,
-                { backgroundColor: userData.gender === 'male' ? theme.colors.primary : theme.colors.buttonBackground,
+                userData.gender === 'Male' && styles.selectedButton,
+                { backgroundColor: userData.gender === 'Male' ? theme.colors.primary : theme.colors.buttonBackground,
                   borderColor: theme.colors.border,
                 }
               ]}
-              onPress={() => setUserData({ ...userData, gender: 'male' })}
+              onPress={() => setUserData({ ...userData, gender: 'Male' })}
             >
               {/* <FontAwesome5 name="male" size={24} color={userData.gender === 'male' ? '#fff' : theme.colors.text} style={styles.genderIcon} /> */}
               <Text style={[
                 styles.genderButtonText,
-                { color: userData.gender === 'male' ? '#fff' : theme.colors.text }
+                { color: userData.gender === 'Male' ? '#fff' : theme.colors.text }
               ]}>
                 Male
               </Text>
@@ -105,16 +105,16 @@ const OnboardingScreen = () => {
             <TouchableOpacity
               style={[
                 styles.genderButton,
-                userData.gender === 'female' && styles.selectedButton,
-                { backgroundColor: userData.gender === 'female' ? theme.colors.primary : theme.colors.buttonBackground,
+                userData.gender === 'Female' && styles.selectedButton,
+                { backgroundColor: userData.gender === 'Female' ? theme.colors.primary : theme.colors.buttonBackground,
                   borderColor: theme.colors.border, }
               ]}
-              onPress={() => setUserData({ ...userData, gender: 'female' })}
+              onPress={() => setUserData({ ...userData, gender: 'Female' })}
             >
               {/* <FontAwesome5 name="female" size={24} color={userData.gender === 'female' ? '#fff' : theme.colors.text} style={styles.genderIcon} /> */}
               <Text style={[
                 styles.genderButtonText,
-                { color: userData.gender === 'female' ? '#fff' : theme.colors.text }
+                { color: userData.gender === 'Female' ? '#fff' : theme.colors.text }
               ]}>
                 Female
               </Text>
@@ -280,13 +280,13 @@ const OnboardingScreen = () => {
             <TouchableOpacity
               style={[
                 styles.goalButton,
-                userData.activityLevel === 'Very_active' && styles.selectedGoalButton,
-                { backgroundColor: userData.activityLevel === 'Very_active' ? theme.colors.primary : theme.colors.buttonBackground,
+                userData.activityLevel === 'Very Active' && styles.selectedGoalButton,
+                { backgroundColor: userData.activityLevel === 'Very Active' ? theme.colors.primary : theme.colors.buttonBackground,
                   borderColor: theme.colors.border, }
               ]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'Very_active' })}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Very Active' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Very_active' ? '#fff' : theme.colors.text }]}>Very active </Text>
+              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Very Active' ? '#fff' : theme.colors.text }]}>Very Active </Text>
             </TouchableOpacity>
           </View>
         );
@@ -340,7 +340,7 @@ const OnboardingScreen = () => {
                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Weight: {userData.weight} kg </Text>
                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Goal: {userData.goal} </Text>
                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Activity Level: {userData.activityLevel} </Text>
-                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Main Goal: {userData.mainGoal} </Text>
+                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Main Goal: {userData.mainGoal} </Text>
               </View>
           </View>
         );
