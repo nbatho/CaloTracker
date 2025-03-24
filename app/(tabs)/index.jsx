@@ -362,16 +362,19 @@ export default function HomeScreen() {
             <Modal animationType="slide" transparent={true} visible={mealSelectionVisible}>
                 <View style={styles.modalContainer}>
                     <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#333333' : '#FFFFFF' }]}>
-                        <Text style={{ color: isDarkMode ? 'white' : 'black', fontSize: 16, marginBottom: 10 }}>
-                            Chọn bữa ăn cho "{selectedItem?.name}"
+                        <Text style={[styles.modalTitle, { color: isDarkMode ? 'white' : 'black' }]}>
+                            Chọn bữa ăn
+                        </Text>
+                        <Text style={[styles.modalSubtitle, { color: isDarkMode ? 'gray' : 'gray' }]}>
+                            cho "{selectedItem?.name}"
                         </Text>
                         {["Breakfast", "Lunch", "Dinner", "Snack"].map((meal) => (
                             <TouchableOpacity
                                 key={meal}
-                                style={[styles.modalButton, { backgroundColor: isDarkMode ? '#444444' : '#DDDDDD' }]}
+                                style={[styles.mealButton, { backgroundColor: isDarkMode ? '#444444' : '#DDDDDD' }]}
                                 onPress={() => handleMealSelection(meal)}
                             >
-                                <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{meal}</Text>
+                                <Text style={[styles.mealButtonText, { color: isDarkMode ? 'white' : 'black' }]}>{meal} </Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -402,7 +405,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: SPACING, backgroundColor: '#F5F5F5' },
-    scrollContainer: {   borderColor: 'transparent', overflow: 'hidden', borderWidth: 0 },
+    scrollContainer: { borderColor: 'transparent', overflow: 'hidden', borderWidth: 0 },
     topSection: { // Style cho phần kcal và nutrition
         padding: SPACING,
         borderRadius: 10,
@@ -444,6 +447,40 @@ const styles = StyleSheet.create({
         fontWeight: '100',
     },
     modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    modalSubtitle: {
+        fontSize: 16,
+        marginBottom: 16,
+    },
+    mealButton: {
+        backgroundColor: '#DDDDDD',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        marginVertical: 8,
+        width: '100%',
+        alignItems: 'center',
+    },
+    mealButtonText: {
+        fontSize: 16,
+    },
+    deleteModalContainer: {
         width: '80%',
         padding: 20,
         borderRadius: 15, // Bo góc modal
@@ -454,12 +491,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
 
-    },
-    modalContent: {
-        width: 250,
-        padding: SPACING,
-        borderRadius: 10,
-        alignItems: 'center'
     },
     modalButton: {
         flex: 1,
@@ -593,5 +624,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Hiệu ứng mờ nền
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modalButtonText: {
+        fontSize: 16,
+    },
+    modalText: {
+        fontSize: 18,
+        textAlign: 'center',
+        marginBottom: 20,
     },
 });
