@@ -384,16 +384,16 @@ export default function HomeScreen() {
             {/* Modal xác nhận xóa */}
             <Modal animationType="slide" transparent={true} visible={modalVisible}>
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? '#222222' : '#FFFFFF' }]}>
+                    <View style={[styles.deleteModalContainer, { backgroundColor: isDarkMode ? '#222222' : '#FFFFFF' }]}>
                         <Text style={[styles.modalText, { color: isDarkMode ? 'white' : 'black' }]}>
-                            Do you want to delete "{selectedItem?.name}"?
+                            Bạn có muốn xóa "{selectedItem?.name}"?
                         </Text>
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.modalButton, { backgroundColor: isDarkMode ? '#555555' : '#EEEEEE' }]}>
-                                <Text style={{ color: isDarkMode ? 'white' : 'black', fontWeight: 'bold' }}>Cancel</Text>
+                                <Text style={[styles.modalButtonText, { color: isDarkMode ? 'white' : 'black', fontWeight: 'bold' }]}>Hủy</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
-                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Delete</Text>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Xóa</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
