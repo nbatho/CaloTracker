@@ -28,7 +28,7 @@ export default function HomeScreen() {
     const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
 ``
     // user
-    const [TOTAL_KCAL, setTOTAL_KCAL] = useState(0);
+    const [TOTAL_KCAL, setTOTAL_KCAL] = useState(null);
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     // console.log(totalNutrients)
@@ -203,7 +203,7 @@ export default function HomeScreen() {
     }, [route.params]);
     useEffect(() => {
         // console.log("User Data:", userData);
-        // console.log(TOTAL_KCAL)
+        console.log(TOTAL_KCAL)
         console.log(totalNutrients)
         console.log(macros)
     }, [userData]);
@@ -256,7 +256,15 @@ export default function HomeScreen() {
                             <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{suppliedKcal}</Text>
                             <Text style={[styles.kcalLabel, { color: isDarkMode ? 'white' : 'gray' }]}>kcal</Text>
                         </View>
-                        <ArcProgress progress={suppliedKcal } size={180} kcalLeft={TOTAL_KCAL - suppliedKcal + Math.round(burnedKcal)} strokeWidth={15} />
+                            {TOTAL_KCAL !== null && (
+                                <ArcProgress 
+                                    progress={suppliedKcal}
+                                    size={180}
+                                    kcalLeft={TOTAL_KCAL - suppliedKcal + Math.round(burnedKcal)}
+                                    strokeWidth={15} 
+                                />
+                            )}
+
                         <View style={styles.nutritionBox}>
                             {/* Thay đổi icon và label cho Burned */}
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
