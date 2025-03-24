@@ -67,6 +67,7 @@ function AppContent() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
       <View style={styles.container}>
         <Stack>
+          <Stack.Screen name="Onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="setting" options={{ title: "Settings" }} />
           <Stack.Screen name="+not-found" />
