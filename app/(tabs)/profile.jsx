@@ -11,53 +11,15 @@ import {
     useColorScheme,
     ScrollView,
     Platform,
+    Image, // Import component Image
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Svg, { Circle } from 'react-native-svg';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Đảm bảo nội dung không bị che khuất bởi notch hoặc thanh điều hướng
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
-import { saveUserData } from '@/components/redux/diarySlice'; // Import action cập nhật Redux
+import { saveUserData } from '@/components/redux/diarySlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// Hàm tính chỉ số BMI và trả về cả giá trị và trạng thái
-const calculateBMI = (weight, height) => {
-    if (!weight || !height || height === 0) return { bmi: "N/A", status: "N/A" };
-
-    const bmiValue = parseFloat((weight / ((height / 100) * (height / 100))).toFixed(1));
-
-    let status = "";
-    if (bmiValue < 18.5) {
-        status = "Suy dinh dưỡng";
-    } else if (bmiValue < 23) {
-        status = "Bình thường";
-    } else if (bmiValue < 25) {
-        status = "Thừa cân";
-    } else if (bmiValue < 30) {
-        status = "Béo phì độ I";
-    } else {
-        status = "Béo phì độ II";
-    }
-
-    return { bmi: bmiValue, status };
-};
-
-// Component hiển thị BMI dạng vòng tròn
-const BMICircle = ({ bmi, size = 180 }) => {
-    const theme = useColorScheme();
-    const circleColor = theme === 'dark' ? '#a1ce50ff' : '#a1ce50ff'; // LightGreen/ForestGreen
-    const fillColor = theme === 'dark' ? '#1E1E1E' : '#FFFFFF';
-
-    return (
-        <View style={[styles.bmiContainer, { width: size, height: size }]}>
-            <Svg width={size} height={size} viewBox="0 0 100 100">
-                <Circle cx="50" cy="50" r="45" stroke={circleColor} strokeWidth="6" fill={fillColor} />
-            </Svg>
-            <View style={styles.textContainer}>
-                <Text style={[styles.bmiText, { fontSize: size * 0.2, color: circleColor }]}>{bmi}</Text>
-                <Text style={[styles.bmiLabel, { fontSize: size * 0.12, color: circleColor }]}>BMI</Text>
-            </View>
-        </View>
-    );
-};
+import * as ImagePicker from 'expo-image-picker'; // Import thư viện ImagePicker
 
 // Component cho các mục thông tin có thể ấn vào
 const ProfileItem = ({ icon, label, onPress }) => {
@@ -107,9 +69,8 @@ export default function ProfileScreen() {
     const [tempHeight, setTempHeight] = useState("");
     const [tempAge, setTempAge] = useState("");
 
-    // State BMI
-    const [bmi, setBmi] = useState("N/A");
-    const [bmiStatus, setBmiStatus] = useState("N/A");
+    // State để lưu trữ URI của ảnh đại diện
+    const [profileImage, setProfileImage] = useState(userData.profileImage || null);
 
     const theme = useColorScheme();
     const isDarkMode = theme === 'dark';
@@ -122,19 +83,40 @@ export default function ProfileScreen() {
     const updateUserData = async (updatedData) => {
         try {
             const newUserData = { ...userData, ...updatedData };
-            await AsyncStorage.setItem('userData', JSON.stringify(newUserData)); //  Lưu vào AsyncStorage
-            dispatch(saveUserData(newUserData)); //  Cập nhật Redux
+            await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
+            dispatch(saveUserData(newUserData));
         } catch (error) {
             console.error("❌ Lỗi khi lưu userData:", error);
         }
     };
-    
-    // Sử dụng useEffect để tính BMI mỗi khi weight hoặc height thay đổi
+
+    // Hàm chọn ảnh từ thư viện
+    const pickImage = async () => {
+        // Yêu cầu quyền truy cập thư viện ảnh
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Xin lỗi, chúng tôi cần quyền truy cập thư viện ảnh để thực hiện chức năng này!');
+            return;
+        }
+
+        // Mở thư viện ảnh và cho phép người dùng chọn ảnh
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        // Nếu người dùng đã chọn ảnh
+        if (!result.canceled) {
+            setProfileImage(result.assets[0].uri);
+            updateUserData({ profileImage: result.assets[0].uri }); // Lưu URI vào Redux và AsyncStorage
+        }
+    };
+
     useEffect(() => {
-        const { bmi: calculatedBmi, status: calculatedStatus } = calculateBMI(parseFloat(weight), parseFloat(height));
-        setBmi(calculatedBmi);
-        setBmiStatus(calculatedStatus);
-    }, [weight, height]);
+        setProfileImage(userData.profileImage || null);
+    }, [userData.profileImage]);
 
     const handlePress = (content) => {
         setModalContent(content);
@@ -149,7 +131,7 @@ export default function ProfileScreen() {
     const handleCloseModal = () => {
         setModalVisible(false);
         Keyboard.dismiss();
-    
+
         let updatedField = {};
         if (modalContent === 'Weight') {
             setWeight(tempWeight);
@@ -163,10 +145,10 @@ export default function ProfileScreen() {
             setAge(tempAge);
             updatedField = { birthday: { ...userData.birthday, year: (new Date().getFullYear() - parseInt(tempAge)).toString() } };
         }
-    
-        updateUserData(updatedField); // Cập nhật Redux & AsyncStorage
+
+        updateUserData(updatedField);
     };
-    
+
 
     const handleActivitySelect = (level) => {
         // console.log("🔹 Đã chọn activityLevel:", level);
@@ -186,7 +168,7 @@ export default function ProfileScreen() {
         updateUserData({ goal: goal });
         handleCloseModal();
     };
-    
+
 
     const activityOptions = ['Sedentary', 'Low Active', 'Active', 'Very Active'];
     const genderOptions = ['Male', 'Female', 'Other'];
@@ -196,11 +178,16 @@ export default function ProfileScreen() {
         <SafeAreaView style={[styles.safeArea, { backgroundColor: backgroundColor }]}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.profileHeader}>
-                    <BMICircle bmi={bmi} size={140} />
-                    <Text style={[styles.status, { color: textColor }]}>{bmiStatus}</Text>
-                    <Text style={[styles.risk, { color: subTextColor }]}>
-                        Risk of comorbidities: Average
-                    </Text>
+                    {/* Thay thế BMICircle bằng ảnh đại diện */}
+                    <TouchableOpacity onPress={pickImage}>
+                        {profileImage ? (
+                            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                        ) : (
+                            <View style={[styles.profileImage, { backgroundColor: '#DDDDDD', justifyContent: 'center', alignItems: 'center' }]}>
+                                <FontAwesome5 name="user-circle" size={70} color="#999999" />
+                            </View>
+                        )}
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.profileItems}>
@@ -311,8 +298,8 @@ export default function ProfileScreen() {
                                         </View>
                                     )}
 
-                                     {/* Nút đóng */}
-                                {/* <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+                                    {/* Nút đóng */}
+                                    {/* <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
                                     <Text style={[styles.closeButtonItem, { color: isDarkMode ? 'lightgray' : 'gray' }]}>Đóng</Text>
                                 </TouchableOpacity> */}
                                 </View>
@@ -418,7 +405,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 10,
         width: '80%',
-        backgroundColor: '#a1ce50ff' ,
+        backgroundColor: '#a1ce50ff',
     },
     modalTitle: {
         fontSize: 20,
@@ -458,6 +445,13 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 8,
+    },
+    profileImage: { // Style cho ảnh đại diện
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        // borderWidth: 3,
+        // borderColor: '#a1ce50ff',
     }
-    
+
 });

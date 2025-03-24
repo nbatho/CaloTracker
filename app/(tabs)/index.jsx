@@ -48,7 +48,7 @@ export default function HomeScreen() {
     const height = userData?.height || 0;
     const weight = userData?.weight || 0;
     const time = 1; // gio 
-    const burnedKcal = totalNutrients.totalMET * weight * 1|| 0;
+    const burnedKcal = totalNutrients.totalMET * weight * 1 || 0;
     useEffect(() => {
         if (userData && userData.weight && userData.height) {
             setTOTAL_KCAL(calculateTDEE(userData));
@@ -56,17 +56,17 @@ export default function HomeScreen() {
     }, [userData]);
     const calculateTDEE = (userData) => {
         if (!userData) return 0; // Tránh lỗi nếu userData không tồn tại
-    
+
         const { gender, weight, height, birthday, activityLevel } = userData;
-    
+
         // Tính tuổi từ ngày sinh
         const birthYear = parseInt(birthday?.year, 10);
         const currentYear = new Date().getFullYear();
         const age = currentYear - birthYear;
-    
+
         // Kiểm tra dữ liệu hợp lệ
         if (!weight || !height || !age || !gender || !activityLevel) return 0;
-    
+
         // Tính BMR dựa trên giới tính
         let BMR;
         if (gender === "male") {
@@ -76,7 +76,7 @@ export default function HomeScreen() {
         } else {
             return 0; // Trường hợp giới tính không hợp lệ
         }
-    
+
         // Hệ số hoạt động
         const activityMultipliers = {
             sedentary: 1.2,
@@ -85,18 +85,18 @@ export default function HomeScreen() {
             active: 1.725,
             very_active: 1.9,
         };
-    
+
         const activityFactor = activityMultipliers[activityLevel] || 1.2; // Mặc định nếu không có giá trị hợp lệ
-    
+
         // Tính TDEE
         const TDEE = Math.round(BMR * activityFactor);
         return TDEE;
     };
-    
+
     useEffect(() => {
         console.log("User Data:", userData);
     }, [userData]);
-    
+
 
 
     useEffect(() => {
@@ -202,7 +202,7 @@ export default function HomeScreen() {
                 }}
                 scrollEventThrottle={16}
                 showsVerticalScrollIndicator={false}
-                
+
             >
 
                 {/* Progress and Nutrition Stats */}
@@ -217,7 +217,7 @@ export default function HomeScreen() {
                             <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{suppliedKcal}</Text>
                             <Text style={[styles.kcalLabel, { color: isDarkMode ? 'white' : 'gray' }]}>kcal</Text>
                         </View>
-                        <ArcProgress progress={suppliedKcal } size={180} kcalLeft={TOTAL_KCAL - suppliedKcal + burnedKcal} strokeWidth={15} />
+                        <ArcProgress progress={suppliedKcal} size={180} kcalLeft={TOTAL_KCAL - suppliedKcal + burnedKcal} strokeWidth={15} />
                         <View style={styles.nutritionBox}>
                             {/* Thay đổi icon và label cho Burned */}
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -232,7 +232,7 @@ export default function HomeScreen() {
                     {/* Thêm container cho "Eaten" */}
                     <View style={styles.eatenContainer}>
                         <Text style={[styles.eatenText, { color: isDarkMode ? 'gray' : 'gray' }]}>Eaten </Text>
-                        <Text style={[styles.eatenText, styles.eatenLine, { color: isDarkMode ? 'gray' : 'gray' }]}> —————————————————————————————————————</Text>
+                        <Text style={[styles.eatenLine, { color: isDarkMode ? 'gray' : 'gray' }]}> —————————————————————————————————————</Text>
                     </View>
 
                     <View style={styles.nutritionContainer}>
@@ -250,8 +250,8 @@ export default function HomeScreen() {
                                 name: "Fat",
                                 progress: Math.round(totalNutrients.fat),
                                 max: 70,
-                                color: "#F44336",
-                                endPointColor: "#F44336",
+                                color: "#FF9800",
+                                endPointColor: "#FF9800",
                                 type: "Fat",
                                 emptyColor: "#FF9800"
                             },
@@ -259,8 +259,8 @@ export default function HomeScreen() {
                                 name: "Protein",
                                 progress: Math.round(totalNutrients.proteins),
                                 max: 150,
-                                color: "#FF9800",
-                                endPointColor: "#FF9800",
+                                color: "#2196F3",
+                                endPointColor: "#2196F3",
                                 type: "Protein",
                                 emptyColor: "#2196F3"
                             }
@@ -340,16 +340,19 @@ export default function HomeScreen() {
             <Modal animationType="slide" transparent={true} visible={mealSelectionVisible}>
                 <View style={styles.modalContainer}>
                     <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#333333' : '#FFFFFF' }]}>
-                        <Text style={{ color: isDarkMode ? 'white' : 'black', fontSize: 16, marginBottom: 10 }}>
-                            Chọn bữa ăn cho "{selectedItem?.name}"
+                        <Text style={[styles.modalTitle, { color: isDarkMode ? 'white' : 'black' }]}>
+                            Chọn bữa ăn
+                        </Text>
+                        <Text style={[styles.modalSubtitle, { color: isDarkMode ? 'gray' : 'gray' }]}>
+                            cho "{selectedItem?.name}"
                         </Text>
                         {["Breakfast", "Lunch", "Dinner", "Snack"].map((meal) => (
                             <TouchableOpacity
                                 key={meal}
-                                style={[styles.modalButton, { backgroundColor: isDarkMode ? '#444444' : '#DDDDDD' }]}
+                                style={[styles.mealButton, { backgroundColor: isDarkMode ? '#444444' : '#DDDDDD' }]}
                                 onPress={() => handleMealSelection(meal)}
                             >
-                                <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{meal}</Text>
+                                <Text style={[styles.mealButtonText, { color: isDarkMode ? 'white' : 'black' }]}>{meal}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -359,16 +362,16 @@ export default function HomeScreen() {
             {/* Modal xác nhận xóa */}
             <Modal animationType="slide" transparent={true} visible={modalVisible}>
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? '#222222' : '#FFFFFF' }]}>
+                    <View style={[styles.deleteModalContainer, { backgroundColor: isDarkMode ? '#222222' : '#FFFFFF' }]}>
                         <Text style={[styles.modalText, { color: isDarkMode ? 'white' : 'black' }]}>
-                            Do you want to delete "{selectedItem?.name}"?
+                            Bạn có muốn xóa "{selectedItem?.name}"?
                         </Text>
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.modalButton, { backgroundColor: isDarkMode ? '#555555' : '#EEEEEE' }]}>
-                                <Text style={{ color: isDarkMode ? 'white' : 'black', fontWeight: 'bold' }}>Cancel</Text>
+                                <Text style={[styles.modalButtonText, { color: isDarkMode ? 'white' : 'black', fontWeight: 'bold' }]}>Hủy</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={deleteItem} style={[styles.modalButton, { backgroundColor: 'red' }]}>
-                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Delete</Text>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Xóa</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -380,7 +383,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: SPACING, backgroundColor: '#F5F5F5' },
-    scrollContainer: {   borderColor: 'transparent', overflow: 'hidden', borderWidth: 0 },
+    scrollContainer: { borderColor: 'transparent', overflow: 'hidden', borderWidth: 0 },
     topSection: { // Style cho phần kcal và nutrition
         padding: SPACING,
         borderRadius: 10,
@@ -422,6 +425,40 @@ const styles = StyleSheet.create({
         fontWeight: '100',
     },
     modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    modalSubtitle: {
+        fontSize: 16,
+        marginBottom: 16,
+    },
+    mealButton: {
+        backgroundColor: '#DDDDDD',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        marginVertical: 8,
+        width: '100%',
+        alignItems: 'center',
+    },
+    mealButtonText: {
+        fontSize: 16,
+    },
+    deleteModalContainer: {
         width: '80%',
         padding: 20,
         borderRadius: 15, // Bo góc modal
@@ -432,12 +469,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
 
-    },
-    modalContent: {
-        width: 250,
-        padding: SPACING,
-        borderRadius: 10,
-        alignItems: 'center'
     },
     modalButton: {
         flex: 1,
@@ -571,5 +602,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Hiệu ứng mờ nền
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modalButtonText: {
+        fontSize: 16,
+    },
+    modalText: {
+        fontSize: 18,
+        textAlign: 'center',
+        marginBottom: 20,
     },
 });
