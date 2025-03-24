@@ -36,8 +36,8 @@ export default function HomeScreen() {
         }
     }, [userData]);
 
-    console.log("TOTAL_KCAL (TDEE):", TOTAL_KCAL);
-
+    // console.log("TOTAL_KCAL (TDEE):", TOTAL_KCAL);
+    
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     // console.log(totalNutrients)
@@ -92,9 +92,31 @@ export default function HomeScreen() {
         const TDEE = Math.round(BMR * activityFactor);
         return TDEE;
     };
+    const [macros, setMacros] = useState({ carbs: 0, protein: 0, fat: 0 });
+    const calculateMacros = (TDEE, goal = "maintenance") => {
+        const macroRatios = {
+            cutting: { carbs: 0.3, protein: 0.4, fat: 0.3 }, // Giảm cân
+            bulking: { carbs: 0.4, protein: 0.3, fat: 0.3 }, // Tăng cơ
+            maintenance: { carbs: 0.5, protein: 0.25, fat: 0.25 } // Duy trì
+        };
     
+        const { carbs, protein, fat } = macroRatios[goal] || macroRatios.maintenance;
+    
+        return {
+            carbs: Math.round((TDEE * carbs) / 4), // 1g carb = 4 kcal
+            protein: Math.round((TDEE * protein) / 4), // 1g protein = 4 kcal
+            fat: Math.round((TDEE * fat) / 9) // 1g fat = 9 kcal
+        };
+    };
+    useEffect(() => {
+        if (TOTAL_KCAL > 0 && userData?.mainGoal) {
+            const calculatedMacros = calculateMacros(TOTAL_KCAL, userData.mainGoal.toLowerCase());
+            setMacros(calculatedMacros);
+        }
+    }, [TOTAL_KCAL, userData?.mainGoal]);
     useEffect(() => {
         console.log("User Data:", userData);
+        console.log(macros)
     }, [userData]);
     
 
@@ -240,7 +262,7 @@ export default function HomeScreen() {
                             {
                                 name: "Carbs",
                                 progress: Math.round(totalNutrients.carbohydrates),
-                                max: 200,
+                                max: macros.carbs,
                                 color: "#F44336",
                                 endPointColor: "#F44336",
                                 type: "Carbs",
@@ -249,7 +271,7 @@ export default function HomeScreen() {
                             {
                                 name: "Fat",
                                 progress: Math.round(totalNutrients.fat),
-                                max: 70,
+                                max: macros.fat,
                                 color: "#F44336",
                                 endPointColor: "#F44336",
                                 type: "Fat",
@@ -258,7 +280,7 @@ export default function HomeScreen() {
                             {
                                 name: "Protein",
                                 progress: Math.round(totalNutrients.proteins),
-                                max: 150,
+                                max: macros.protein,
                                 color: "#FF9800",
                                 endPointColor: "#FF9800",
                                 type: "Protein",

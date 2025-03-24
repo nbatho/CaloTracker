@@ -24,10 +24,10 @@ const OnboardingScreen = () => {
     weight: null,
     goal: null,
     activityLevel: null,
-    dietType: null
+    mainGoal: null
   });
 
-  const totalPages = 7;
+  const totalPages = 8;
 
   const handleNext = async () => {
     if (page < totalPages) {
@@ -161,50 +161,75 @@ const OnboardingScreen = () => {
           <View style={styles.contentContainer}>
             <Text style={styles.questionText}>How active are you?</Text>
             <TouchableOpacity
-              style={[styles.goalButton, userData.activityLevel === 'sedentary' && styles.selectedGoalButton]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'sedentary' })}
+              style={[styles.goalButton, userData.activityLevel === 'Sedentary' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Sedentary' })}
             >
-              <Text style={styles.goalButtonText}>Sedentary</Text>
+              <Text style={styles.goalButtonText}>Sedentary </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.goalButton, userData.activityLevel === 'light' && styles.selectedGoalButton]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'light' })}
+              style={[styles.goalButton, userData.activityLevel === 'Light' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Light' })}
             >
               <Text style={styles.goalButtonText}>Light </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.goalButton, userData.activityLevel === 'moderate' && styles.selectedGoalButton]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'moderate' })}
+              style={[styles.goalButton, userData.activityLevel === 'Moderate' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Moderate' })}
             >
               <Text style={styles.goalButtonText}>Moderate </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.goalButton, userData.activityLevel === 'active' && styles.selectedGoalButton]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'active' })}
+              style={[styles.goalButton, userData.activityLevel === 'Active' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Active' })}
             >
-              <Text style={styles.goalButtonText}>Active</Text>
+              <Text style={styles.goalButtonText}>Active </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.goalButton, userData.activityLevel === 'very_active' && styles.selectedGoalButton]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'very_active' })}
+              style={[styles.goalButton, userData.activityLevel === 'Very_active' && styles.selectedGoalButton]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Very_active' })}
             >
-              <Text style={styles.goalButtonText}>Very active</Text>
+              <Text style={styles.goalButtonText}>Very active </Text>
             </TouchableOpacity>
           </View>
         );
-
-      case 7:
+        case 7:
+          return (
+            <View style={styles.contentContainer}>
+              <Text style={styles.questionText}>How active are you?</Text>
+              <TouchableOpacity
+                style={[styles.goalButton, userData.mainGoal === 'Cutting' && styles.selectedGoalButton]}
+                onPress={() => setUserData({ ...userData, mainGoal: 'Cutting' })}
+              >
+                <Text style={styles.goalButtonText}>Cutting </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.goalButton, userData.mainGoal === 'Bulking' && styles.selectedGoalButton]}
+                onPress={() => setUserData({ ...userData, mainGoal: 'Bulking' })}
+              >
+                <Text style={styles.goalButtonText}>Bulking </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.goalButton, userData.mainGoal === 'Maintenance' && styles.selectedGoalButton]}
+                onPress={() => setUserData({ ...userData, mainGoal: 'Maintenance' })}
+              >
+                <Text style={styles.goalButtonText}>Maintenance </Text>
+              </TouchableOpacity>
+            </View>
+          );
+      case 8:
         return (
           <View style={styles.contentContainer}>
-            <Text style={styles.questionText}>Review your details:</Text>
-            <Text>Gender: {userData.gender}</Text>
-            <Text>Birthday: {`${userData.birthday?.day}/${userData.birthday?.month}/${userData.birthday?.year}`}</Text>
-            <Text>Height: {userData.height} cm</Text>
-            <Text>Weight: {userData.weight} kg</Text>
-            <Text>Goal: {userData.goal}</Text>
-            <Text>Activity Level: {userData.activityLevel}</Text>
+            <Text style={styles.questionText}>Review your details: </Text>
+            <Text>Gender: {userData.gender} </Text>
+            <Text>Birthday: {`${userData.birthday?.day}/${userData.birthday?.month}/${userData.birthday?.year}`} </Text>
+            <Text>Height: {userData.height} cm </Text>
+            <Text>Weight: {userData.weight} kg </Text>
+            <Text>Goal: {userData.goal} </Text>
+            <Text>Activity Level: {userData.activityLevel} </Text>
+            <Text>Main Goal: {userData.mainGoal} </Text>
           </View>
         );
+        
 
       default:
         return <Text>Error: Page not found</Text>;
@@ -216,11 +241,11 @@ const OnboardingScreen = () => {
       <View style={styles.header}>
         {page > 1 && (
           <TouchableOpacity onPress={() => setPage(page - 1)}>
-            <Text style={styles.backButton}>Back</Text>
+            <Text style={styles.backButton}>Back </Text>
           </TouchableOpacity>
         )}
         <Progress.Bar progress={page / totalPages} width={200} color="#86CB52" />
-        <Text>{page}/{totalPages}</Text>
+        <Text>{page}/{totalPages} </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
