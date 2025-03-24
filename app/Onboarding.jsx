@@ -44,6 +44,7 @@ const OnboardingScreen = () => {
       border: colorScheme === 'dark' ? '#555' : '#E0E0E0',    // Thay đổi màu viền
       inputBackground: colorScheme === 'dark' ? '#444' : '#FFFFFF', // Màu nền input
       buttonBackground: colorScheme === 'dark' ? '#444' : '#fff', // Màu nền button
+      reviewBackground: colorScheme === 'dark' ? '#444' : '#fff',
     },
   };
 
@@ -333,7 +334,7 @@ const OnboardingScreen = () => {
         return (
           <View style={styles.contentContainer}>
             <Text style={[styles.questionText, { color: theme.colors.text }]}>Review your details: </Text>
-               <View style={styles.reviewContainer}>
+               <View style={[styles.reviewContainer, { backgroundColor: theme.colors.reviewBackground }]}>
                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Gender: {userData.gender} </Text>
                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Birthday: {`${userData.birthday?.day}/${userData.birthday?.month}/${userData.birthday?.year}`} </Text>
                     <Text style={[styles.reviewText, { color: theme.colors.text }]}>Height: {userData.height} cm </Text>
