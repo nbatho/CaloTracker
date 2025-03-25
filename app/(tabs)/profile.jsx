@@ -171,7 +171,7 @@ export default function ProfileScreen() {
     };
 
 
-    const activityOptions = ['Sedentary', 'Low Active', 'Active', 'Very Active'];
+    const activityOptions = ['Sedentary', 'Moderate', 'Active', 'Very Active'];
     const genderOptions = ['Male', 'Female', 'Other'];
     const goalOptions = ['Cutting', 'Bulking', 'Maintenance'];
 

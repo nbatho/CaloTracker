@@ -245,7 +245,7 @@ const OnboardingScreen = () => {
                   Sedentary
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/*<TouchableOpacity
               style={[
                 styles.goalButton,
                 userData.activityLevel === 'Light' && styles.selectedGoalButton,
@@ -262,7 +262,7 @@ const OnboardingScreen = () => {
                 ]}>
                   Light
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity>*/}
             <TouchableOpacity
               style={[
                 styles.goalButton,
@@ -422,10 +422,11 @@ const OnboardingScreen = () => {
         )}
         <Progress.Bar
           progress={page / totalPages}
-          width={200}
+          width={250}
           color="#86CB52"
           unfilledColor={isDarkMode ? '#333' : '#ddd'}
           borderWidth={0} // Remove border for cleaner look
+          
         />
         <Text style={[isDarkMode ? styles.darkText : styles.lightText]}>
           {page}/{totalPages}
