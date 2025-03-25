@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   View,
@@ -8,47 +8,32 @@ import {
   SafeAreaView,
   StyleSheet,
   useColorScheme,
-  Platform
 } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { useRouter } from 'expo-router';
 import { useDispatch } from 'react-redux';
-import { saveUserData } from '@/components/redux/diarySlice';
+import { saveUserData } from '@/components/redux/diarySlice'; // ✅ Import Redux action
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FontAwesome5 } from '@expo/vector-icons'; // Thêm thư viện icon
 
 const OnboardingScreen = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const colorScheme = useColorScheme(); // Lấy theme của hệ thống
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+
   const [page, setPage] = useState(1);
   const [userData, setUserData] = useState({
     gender: null,
-    birthday: { day: '', month: '', year: '' }, // Khởi tạo birthday là object
-    height: '',
-    weight: '',
-    goal: '',
+    birthday: null,
+    height: null,
+    weight: null,
+    goal: null,
     activityLevel: null,
     mainGoal: null,
   });
 
   const totalPages = 8;
 
-  // Định nghĩa theme màu
-  const theme = {
-    colors: {
-      background: colorScheme === 'dark' ? '#333' : '#F9F9F9',  // Thay đổi màu nền
-      text: colorScheme === 'dark' ? '#fff' : '#212121',      // Thay đổi màu chữ chính
-      textSecondary: colorScheme === 'dark' ? '#ccc' : '#757575', // Thay đổi màu chữ phụ
-      primary: '#86CB52', // Giữ nguyên màu chính
-      border: colorScheme === 'dark' ? '#555' : '#E0E0E0',    // Thay đổi màu viền
-      inputBackground: colorScheme === 'dark' ? '#444' : '#FFFFFF', // Màu nền input
-      buttonBackground: colorScheme === 'dark' ? '#444' : '#fff', // Màu nền button
-      reviewBackground: colorScheme === 'dark' ? '#444' : '#fff',
-    },
-  };
-
-  // Hàm lưu trữ dữ liệu
   const handleNext = async () => {
     if (page < totalPages) {
       setPage(page + 1);
@@ -56,12 +41,12 @@ const OnboardingScreen = () => {
       console.log('✅ Onboarding completed! Saving user data...');
       try {
         await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-        const result = await dispatch(saveUserData(userData));
+        const result = await dispatch(saveUserData(userData)); // Đợi lưu xong
 
         if (saveUserData.fulfilled.match(result)) {
           console.log('✅ User data saved successfully!');
           setTimeout(() => {
-            router.replace('/');
+            router.replace('/'); // Chuyển về màn hình chính
           }, 500);
         } else {
           console.warn('❌ Lưu userData thất bại:', result.error.message);
@@ -72,51 +57,64 @@ const OnboardingScreen = () => {
     }
   };
 
-  //Hàm quay lại trang trước
   const handlePrevious = () => {
     if (page > 1) {
       setPage(page - 1);
     }
   };
-  // Hàm render nội dung trang
+
   const renderPageContent = () => {
+    const textStyle = [
+      styles.questionText,
+      isDarkMode ? styles.darkText : styles.lightText,
+    ];
+    const inputStyle = [
+      styles.input,
+      isDarkMode ? styles.darkInput : styles.lightInput,
+    ];
+
     switch (page) {
       case 1:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>What's your gender?</Text>
+            <Text style={textStyle}>What's your gender?</Text>
             <TouchableOpacity
               style={[
                 styles.genderButton,
-                userData.gender === 'Male' && styles.selectedButton,
-                { backgroundColor: userData.gender === 'Male' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border,
-                }
+                userData.gender === 'male' && styles.selectedButton,
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.gender === 'male' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
-              onPress={() => setUserData({ ...userData, gender: 'Male' })}
+              onPress={() => setUserData({ ...userData, gender: 'male' })}
             >
-              {/* <FontAwesome5 name="male" size={24} color={userData.gender === 'male' ? '#fff' : theme.colors.text} style={styles.genderIcon} /> */}
-              <Text style={[
-                styles.genderButtonText,
-                { color: userData.gender === 'Male' ? '#fff' : theme.colors.text }
-              ]}>
+              <Text
+                style={[
+                  styles.genderButtonText,
+                  userData.gender === 'male' && styles.selectedButtonText,
+                  isDarkMode ? styles.darkText : styles.lightText,
+                  userData.gender === 'male' && isDarkMode ? styles.lightText : {}
+                ]}
+              >
                 Male
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.genderButton,
-                userData.gender === 'Female' && styles.selectedButton,
-                { backgroundColor: userData.gender === 'Female' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                userData.gender === 'female' && styles.selectedButton,
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.gender === 'female' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
-              onPress={() => setUserData({ ...userData, gender: 'Female' })}
+              onPress={() => setUserData({ ...userData, gender: 'female' })}
             >
-              {/* <FontAwesome5 name="female" size={24} color={userData.gender === 'female' ? '#fff' : theme.colors.text} style={styles.genderIcon} /> */}
-              <Text style={[
-                styles.genderButtonText,
-                { color: userData.gender === 'Female' ? '#fff' : theme.colors.text }
-              ]}>
+              <Text
+                style={[
+                  styles.genderButtonText,
+                  userData.gender === 'female' && styles.selectedButtonText,
+                  isDarkMode ? styles.darkText : styles.lightText,
+                  userData.gender === 'female' && isDarkMode ? styles.lightText : {}
+                ]}
+              >
                 Female
               </Text>
             </TouchableOpacity>
@@ -126,48 +124,51 @@ const OnboardingScreen = () => {
       case 2:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>When's your birthday?</Text>
+            <Text style={textStyle}>When's your birthday?</Text>
             <View style={styles.dateInputContainer}>
               <TextInput
-                style={[styles.dateInputBox, {
-                  color: theme.colors.text,
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.border
-                }]}
+                style={[...inputStyle, styles.dateInputBox]}
                 placeholder="DD"
-                placeholderTextColor={theme.colors.textSecondary}
+                placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
                 keyboardType="number-pad"
                 maxLength={2}
                 value={userData.birthday?.day || ''}
-                onChangeText={text => setUserData({ ...userData, birthday: { ...userData.birthday, day: text } })}
+                onChangeText={text =>
+                  setUserData({
+                    ...userData,
+                    birthday: { ...userData.birthday, day: text },
+                  })
+                }
               />
-              <Text style={[styles.slash, { color: theme.colors.text }]}>/</Text>
+              <Text style={[styles.slash, isDarkMode ? styles.darkText : styles.lightText]}>/</Text>
               <TextInput
-                style={[styles.dateInputBox, {
-                  color: theme.colors.text,
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.border
-                }]}
+                style={[...inputStyle, styles.dateInputBox]}
                 placeholder="MM"
-                placeholderTextColor={theme.colors.textSecondary}
+                placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
                 keyboardType="number-pad"
                 maxLength={2}
                 value={userData.birthday?.month || ''}
-                onChangeText={text => setUserData({ ...userData, birthday: { ...userData.birthday, month: text } })}
+                onChangeText={text =>
+                  setUserData({
+                    ...userData,
+                    birthday: { ...userData.birthday, month: text },
+                  })
+                }
               />
-              <Text style={[styles.slash, { color: theme.colors.text }]}>/</Text>
+              <Text style={[styles.slash, isDarkMode ? styles.darkText : styles.lightText]}>/</Text>
               <TextInput
-                style={[styles.dateInputBox, {
-                  color: theme.colors.text,
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.border
-                }]}
+                style={[...inputStyle, styles.dateInputBox]}
                 placeholder="YYYY"
-                placeholderTextColor={theme.colors.textSecondary}
+                placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
                 keyboardType="number-pad"
                 maxLength={4}
                 value={userData.birthday?.year || ''}
-                onChangeText={text => setUserData({ ...userData, birthday: { ...userData.birthday, year: text } })}
+                onChangeText={text =>
+                  setUserData({
+                    ...userData,
+                    birthday: { ...userData.birthday, year: text },
+                  })
+                }
               />
             </View>
           </View>
@@ -176,18 +177,16 @@ const OnboardingScreen = () => {
       case 3:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>How tall are you?</Text>
+            <Text style={textStyle}>How tall are you?</Text>
             <TextInput
-              style={[styles.heightInput, {
-                color: theme.colors.text,
-                backgroundColor: theme.colors.inputBackground,
-                borderColor: theme.colors.border
-              }]}
+              style={inputStyle}
               placeholder="Enter height in cm"
-              placeholderTextColor={theme.colors.textSecondary}
+              placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
               keyboardType="number-pad"
-              value={userData.height}
-              onChangeText={text => setUserData({ ...userData, height: text })}
+              value={userData.height ? userData.height.toString() : ''}
+              onChangeText={text =>
+                setUserData({ ...userData, height: parseInt(text) || 0 })
+              }
             />
           </View>
         );
@@ -195,18 +194,16 @@ const OnboardingScreen = () => {
       case 4:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>What's your current weight?</Text>
+            <Text style={textStyle}>What's your current weight?</Text>
             <TextInput
-              style={[styles.weightInput, {
-                color: theme.colors.text,
-                backgroundColor: theme.colors.inputBackground,
-                borderColor: theme.colors.border
-              }]}
+              style={inputStyle}
               placeholder="Enter weight in kg"
-              placeholderTextColor={theme.colors.textSecondary}
+              placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
               keyboardType="number-pad"
-              value={userData.weight}
-              onChangeText={text => setUserData({ ...userData, weight: text })}
+              value={userData.weight ? userData.weight.toString() : ''}
+              onChangeText={text =>
+                setUserData({ ...userData, weight: parseInt(text) || 0 })
+              }
             />
           </View>
         );
@@ -214,17 +211,13 @@ const OnboardingScreen = () => {
       case 5:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>What's your target weight?</Text>
+            <Text style={textStyle}>What's your target weight?</Text>
             <TextInput
-              style={[styles.targetWeightInput, {
-                color: theme.colors.text,
-                backgroundColor: theme.colors.inputBackground,
-                borderColor: theme.colors.border
-              }]}
+              style={inputStyle}
               placeholder="Enter target weight in kg"
-              placeholderTextColor={theme.colors.textSecondary}
+              placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
               keyboardType="number-pad"
-              value={userData.goal}
+              value={userData.goal ? userData.goal.toString() : ''}
               onChangeText={text => setUserData({ ...userData, goal: text })}
             />
           </View>
@@ -233,146 +226,223 @@ const OnboardingScreen = () => {
       case 6:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>How active are you?</Text>
+            <Text style={textStyle}>How active are you?</Text>
             <TouchableOpacity
               style={[
                 styles.goalButton,
                 userData.activityLevel === 'Sedentary' && styles.selectedGoalButton,
-                { backgroundColor: userData.activityLevel === 'Sedentary' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.activityLevel === 'Sedentary' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
               onPress={() => setUserData({ ...userData, activityLevel: 'Sedentary' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Sedentary' ? '#fff' : theme.colors.text }]}>Sedentary </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.activityLevel === 'Sedentary' && styles.selectedGoalText,
+                userData.activityLevel === 'Sedentary' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Sedentary
+              </Text>
             </TouchableOpacity>
-            {/*<TouchableOpacity
-              style={[
-                styles.goalButton,
-                userData.activityLevel === 'Light' && styles.selectedGoalButton,
-                { backgroundColor: userData.activityLevel === 'Light' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
-              ]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'Light' })}
-            >
-              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Light' ? '#fff' : theme.colors.text }]}>Light </Text>
-            </TouchableOpacity> */}
             <TouchableOpacity
               style={[
                 styles.goalButton,
-                userData.activityLevel === 'Low Active' && styles.selectedGoalButton,
-                { backgroundColor: userData.activityLevel === 'Low Active' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                userData.activityLevel === 'Light' && styles.selectedGoalButton,
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.activityLevel === 'Light' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'Low Active' })}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Light' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Low Active' ? '#fff' : theme.colors.text }]}>Low Active </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.activityLevel === 'Light' && styles.selectedGoalText,
+                userData.activityLevel === 'Light' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Light
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.goalButton,
+                userData.activityLevel === 'Moderate' && styles.selectedGoalButton,
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.activityLevel === 'Moderate' && isDarkMode ? styles.darkSelectedButton : {}
+              ]}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Moderate' })}
+            >
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.activityLevel === 'Moderate' && styles.selectedGoalText,
+                userData.activityLevel === 'Moderate' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Moderate
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.goalButton,
                 userData.activityLevel === 'Active' && styles.selectedGoalButton,
-                { backgroundColor: userData.activityLevel === 'Active' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.activityLevel === 'Active' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
               onPress={() => setUserData({ ...userData, activityLevel: 'Active' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Active' ? '#fff' : theme.colors.text }]}>Active </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.activityLevel === 'Active' && styles.selectedGoalText,
+                userData.activityLevel === 'Active' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Active
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.goalButton,
-                userData.activityLevel === 'Very Active' && styles.selectedGoalButton,
-                { backgroundColor: userData.activityLevel === 'Very Active' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                userData.activityLevel === 'Very_active' && styles.selectedGoalButton,
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.activityLevel === 'Very_active' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
-              onPress={() => setUserData({ ...userData, activityLevel: 'Very Active' })}
+              onPress={() => setUserData({ ...userData, activityLevel: 'Very_active' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.activityLevel === 'Very Active' ? '#fff' : theme.colors.text }]}>Very Active </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.activityLevel === 'Very_active' && styles.selectedGoalText,
+                userData.activityLevel === 'Very_active' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Very active
+              </Text>
             </TouchableOpacity>
           </View>
         );
       case 7:
         return (
           <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>What is your goal?</Text>
+            <Text style={textStyle}>What is your main goal?</Text>
             <TouchableOpacity
               style={[
                 styles.goalButton,
                 userData.mainGoal === 'Cutting' && styles.selectedGoalButton,
-                { backgroundColor: userData.mainGoal === 'Cutting' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.mainGoal === 'Cutting' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
               onPress={() => setUserData({ ...userData, mainGoal: 'Cutting' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.mainGoal === 'Cutting' ? '#fff' : theme.colors.text }]}>Cutting </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.mainGoal === 'Cutting' && styles.selectedGoalText,
+                userData.mainGoal === 'Cutting' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Cutting
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.goalButton,
                 userData.mainGoal === 'Bulking' && styles.selectedGoalButton,
-                { backgroundColor: userData.mainGoal === 'Bulking' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.mainGoal === 'Bulking' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
               onPress={() => setUserData({ ...userData, mainGoal: 'Bulking' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.mainGoal === 'Bulking' ? '#fff' : theme.colors.text }]}>Bulking </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.mainGoal === 'Bulking' && styles.selectedGoalText,
+                userData.mainGoal === 'Bulking' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Bulking
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.goalButton,
                 userData.mainGoal === 'Maintenance' && styles.selectedGoalButton,
-                { backgroundColor: userData.mainGoal === 'Maintenance' ? theme.colors.primary : theme.colors.buttonBackground,
-                  borderColor: theme.colors.border, }
+                isDarkMode ? styles.darkButton : styles.lightButton,
+                userData.mainGoal === 'Maintenance' && isDarkMode ? styles.darkSelectedButton : {}
               ]}
               onPress={() => setUserData({ ...userData, mainGoal: 'Maintenance' })}
             >
-              <Text style={[styles.goalButtonText, { color: userData.mainGoal === 'Maintenance' ? '#fff' : theme.colors.text }]}>Maintenance </Text>
+              <Text style={[
+                styles.goalButtonText,
+                isDarkMode ? styles.darkText : styles.lightText,
+                userData.mainGoal === 'Maintenance' && styles.selectedGoalText,
+                userData.mainGoal === 'Maintenance' && isDarkMode ? styles.lightText : {}
+                ]}>
+                  Maintenance
+              </Text>
             </TouchableOpacity>
           </View>
         );
       case 8:
         return (
-          <View style={styles.contentContainer}>
-            <Text style={[styles.questionText, { color: theme.colors.text }]}>Review your details: </Text>
-               <View style={[styles.reviewContainer, { backgroundColor: theme.colors.reviewBackground }]}>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Gender: {userData.gender} </Text>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Birthday: {`${userData.birthday?.day}/${userData.birthday?.month}/${userData.birthday?.year}`} </Text>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Height: {userData.height} cm </Text>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Weight: {userData.weight} kg </Text>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Goal: {userData.goal} </Text>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Activity Level: {userData.activityLevel} </Text>
-                    <Text style={[styles.reviewText, { color: theme.colors.text }]}>Main Goal: {userData.mainGoal} </Text>
-              </View>
+          <View style={[styles.contentContainer, styles.reviewContainer, isDarkMode ? styles.darkReviewContainer : styles.lightReviewContainer]}>
+            <Text style={[...textStyle, styles.reviewTitle]}>Review your details:</Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Gender: {userData.gender}
+            </Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Birthday: {`${userData.birthday?.day}/${userData.birthday?.month}/${userData.birthday?.year}`}
+            </Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Height: {userData.height} cm
+            </Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Weight: {userData.weight} kg
+            </Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Goal: {userData.goal}
+            </Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Activity Level: {userData.activityLevel}
+            </Text>
+            <Text style={[styles.reviewText, isDarkMode ? styles.darkText : styles.lightText]}>
+              Main Goal: {userData.mainGoal}
+            </Text>
           </View>
         );
 
       default:
-        return <Text style={{ color: theme.colors.text }}>Error: Page not found</Text>;
+        return <Text style={isDarkMode ? styles.darkText : styles.lightText}>Error: Page not found</Text>;
     }
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-
-      <View style={[styles.progressContainer, { backgroundColor: theme.colors.background, paddingTop: 75 }]}>
-        {page > 1 ? (
+    <SafeAreaView style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
+      <View style={styles.header}>
+        {page > 1 && (
           <TouchableOpacity onPress={handlePrevious}>
-            <Text style={[styles.backButton, { color: theme.colors.primary }]}>Back </Text>
+            <Text style={[styles.backButton, isDarkMode ? styles.darkText : styles.lightText]}>Back</Text>
           </TouchableOpacity>
-        ) : (
-          <View style={{ width: 30 }} /> // Placeholder để giữ cân bằng
         )}
-        <Progress.Bar progress={page / totalPages} width={250} color={theme.colors.primary} />
-        <Text style={{ color: theme.colors.text }}>{page}/{totalPages} </Text>
+        <Progress.Bar
+          progress={page / totalPages}
+          width={200}
+          color="#86CB52"
+          unfilledColor={isDarkMode ? '#333' : '#ddd'}
+          borderWidth={0} // Remove border for cleaner look
+        />
+        <Text style={[isDarkMode ? styles.darkText : styles.lightText]}>
+          {page}/{totalPages}
+        </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {renderPageContent()}
       </ScrollView>
 
-      <TouchableOpacity style={[styles.continueButton, { backgroundColor: theme.colors.primary }]} onPress={handleNext}>
-        <Text style={styles.continueButtonText}>{page === totalPages ? 'Finish & Save' : 'Continue'}</Text>
-      </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.continueButton} onPress={handleNext}>
+            <Text style={styles.continueButtonText}>
+                {page === totalPages ? 'Finish & Save' : 'Continue'}
+            </Text>
+            </TouchableOpacity>
+        </View>
     </SafeAreaView>
   );
 };
@@ -380,41 +450,25 @@ const OnboardingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+  },
+  lightContainer: {
+    backgroundColor: '#fff',
   },
   darkContainer: {
-    backgroundColor: '#333',
+    backgroundColor: '#121212',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 15,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  progressContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        backgroundColor: '#fff',
-  },
-  darkHeader: {
-    backgroundColor: '#1a1a1a',
-    shadowColor: '#fff',
+    paddingTop: 20,
   },
   scrollContainer: {
     flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 20,
+    paddingBottom: 20, // Add padding at the bottom
   },
   contentContainer: {
     width: '80%',
@@ -422,69 +476,60 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   questionText: {
-    fontSize: 20,
+    fontSize: 24, // Increased size for better readability
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
   genderButton: {
-    flexDirection: 'row',
     width: '100%',
     paddingVertical: 15,
-    borderWidth: 2,
-    borderColor: '#d3d3d3',
+    borderWidth: 1,
     borderRadius: 30,
     alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 10,
   },
   genderButtonText: {
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  genderIcon: {
-    marginRight: 5
-  },
-  darkButton: {
-        backgroundColor: '#444',
-        borderColor: '#555',
-  },
-  selectedDarkButton: {
-        backgroundColor: '#86CB52', // The requested green color
-        borderColor: '#86CB52',
-  },
-  selectedDarkText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 18,
   },
   selectedButton: {
     backgroundColor: '#86CB52',
     borderColor: '#86CB52',
-
   },
+  selectedButtonText: {
+    color: '#fff',
+  },
+
   dateInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 20,
+    width: '100%', // Ensure full width
   },
   dateInputBox: {
     borderWidth: 1,
-    borderColor: '#d3d3d3',
-    borderRadius: 10,
+    borderRadius: 5,
     padding: 12,
     fontSize: 18,
-    width: 90,
+    width: '28%', // Evenly distribute the width
     textAlign: 'center',
-
   },
   slash: {
     fontSize: 20,
     marginHorizontal: 5,
   },
+
+  input: {
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 12,
+    fontSize: 18,
+    width: '100%',
+    marginBottom: 15,
+  },
   heightInput: {
     borderWidth: 1,
+    borderColor: '#d3d3d3',
     borderRadius: 5,
     padding: 10,
     fontSize: 16,
@@ -493,6 +538,7 @@ const styles = StyleSheet.create({
   },
   weightInput: {
     borderWidth: 1,
+    borderColor: '#d3d3d3',
     borderRadius: 5,
     padding: 10,
     fontSize: 16,
@@ -501,64 +547,105 @@ const styles = StyleSheet.create({
   },
   targetWeightInput: {
     borderWidth: 1,
+    borderColor: '#d3d3d3',
     borderRadius: 5,
     padding: 10,
     fontSize: 16,
     width: '100%',
     marginBottom: 5
   },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center', // Horizontally center the button
+    paddingBottom: 20,
+  },
   continueButton: {
     backgroundColor: '#86CB52',
-    paddingVertical: 18,
-    borderRadius: 35,
+    paddingVertical: 15,
+    borderRadius: 30,
     alignItems: 'center',
     width: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
-    alignSelf: 'center',
   },
   continueButtonText: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
   },
+
   goalButton: {
     width: '100%',
     paddingVertical: 15,
-    borderWidth: 2,
-    borderColor: '#d3d3d3',
+    borderWidth: 1,
     borderRadius: 30,
     alignItems: 'center',
     marginBottom: 10,
   },
   goalButtonText: {
-    fontSize: 16,
+    fontSize: 18,
   },
   selectedGoalButton: {
     backgroundColor: '#86CB52',
     borderColor: '#86CB52',
   },
+    selectedGoalText: {
+    color: '#fff',
+  },
   backButton: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  lightText: {
+    color: '#333',
+  },
+  darkText: {
+    color: '#fff',
+  },
+  lightInput: {
+    backgroundColor: '#fff',
+    borderColor: '#d3d3d3',
+    color: '#333',
+  },
+  darkInput: {
+    backgroundColor: '#333',
+    borderColor: '#555',
+    color: '#fff',
+  },
+  darkButton: {
+    borderColor: '#555',
+  },
+  lightButton: {
+    borderColor: '#d3d3d3',
+  },
+  darkSelectedButton: {
+    backgroundColor: '#86CB52',
+    borderColor: '#86CB52',
   },
   reviewContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    width: '100%',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    width: '90%',
+  },
+  lightReviewContainer: {
+    borderColor: '#d3d3d3',
+    backgroundColor: '#f9f9f9',
+  },
+  darkReviewContainer: {
+    borderColor: '#555',
+    backgroundColor: '#333',
+  },
+  reviewTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'left',
   },
   reviewText: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: '#444',
+    fontSize: 16,
+    marginBottom: 5,
+    textAlign: 'left',
   },
 });
 

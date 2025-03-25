@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Modal, ScrollView, Image, Animated } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
-import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate } from '@/components/redux/diarySlice';
+import { loadTodaySectionsData, deleteItemFromSection, addItemToSelectedDate, loadTotalNutrients, loadUserData } from '@/components/redux/diarySlice';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RingProgress from '../../components/RingProgress';
 import ArcProgress from '../../components/ArcProgress';
@@ -26,18 +26,9 @@ export default function HomeScreen() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedSection, setSelectedSection] = useState(null);
     const [mealSelectionVisible, setMealSelectionVisible] = useState(false);
-
+``
     // user
-    const [TOTAL_KCAL, setTOTAL_KCAL] = useState(0);
-
-    useEffect(() => {
-        if (userData) {
-            setTOTAL_KCAL(calculateTDEE(userData));
-        }
-    }, [userData]);
-
-    console.log("TOTAL_KCAL (TDEE):", TOTAL_KCAL);
-
+    const [TOTAL_KCAL, setTOTAL_KCAL] = useState(null);
     const Weight = 70;
     const suppliedKcal = totalNutrients.energy || 0;
     // console.log(totalNutrients)
@@ -48,25 +39,27 @@ export default function HomeScreen() {
     const height = userData?.height || 0;
     const weight = userData?.weight || 0;
     const time = 1; // gio 
-    const burnedKcal = totalNutrients.totalMET * weight * 1 || 0;
-    useEffect(() => {
-        if (userData && userData.weight && userData.height) {
-            setTOTAL_KCAL(calculateTDEE(userData));
-        }
-    }, [userData]);
+    const burnedKcal = totalNutrients.totalMET * weight * 1|| 0;
+    
+    
+    
+
+    // console.log("TOTAL_KCAL (TDEE):", TOTAL_KCAL);
+    
+
     const calculateTDEE = (userData) => {
         if (!userData) return 0; // Tránh lỗi nếu userData không tồn tại
-
+    
         const { gender, weight, height, birthday, activityLevel } = userData;
-
+    
         // Tính tuổi từ ngày sinh
         const birthYear = parseInt(birthday?.year, 10);
         const currentYear = new Date().getFullYear();
         const age = currentYear - birthYear;
-
+    
         // Kiểm tra dữ liệu hợp lệ
         if (!weight || !height || !age || !gender || !activityLevel) return 0;
-
+    
         // Tính BMR dựa trên giới tính
         let BMR;
         if (gender === "male") {
@@ -76,7 +69,7 @@ export default function HomeScreen() {
         } else {
             return 0; // Trường hợp giới tính không hợp lệ
         }
-
+    
         // Hệ số hoạt động
         const activityMultipliers = {
             sedentary: 1.2,
@@ -85,45 +78,29 @@ export default function HomeScreen() {
             active: 1.725,
             very_active: 1.9,
         };
-
+    
         const activityFactor = activityMultipliers[activityLevel] || 1.2; // Mặc định nếu không có giá trị hợp lệ
-
+    
         // Tính TDEE
         const TDEE = Math.round(BMR * activityFactor);
         return TDEE;
     };
-
-    useEffect(() => {
-        console.log("User Data:", userData);
-    }, [userData]);
-
-
-
-    useEffect(() => {
-        dispatch(loadTodaySectionsData());
-    }, [dispatch]);
-    useEffect(() => {
-        dispatch(loadTodaySectionsData());
-    }, [totalNutrients]);
-
-    useEffect(() => {
-        if (route.params?.product && !selectedItem) {
-            const productData = JSON.parse(route.params.product);
-            setTimeout(() => {
-                setSelectedItem(productData);
-                setMealSelectionVisible(true);
-            }, 300);
-        }
-    }, [route.params]);
-
-    useEffect(() => {
-        Animated.timing(scrollY, {
-            toValue: scrollY.__getValue(), // Giữ nguyên giá trị hiện tại
-            duration: 0,
-            useNativeDriver: true,
-        }).start();
-    }, [todaySelection]);
-
+    const [macros, setMacros] = useState({ carbs: 0, protein: 0, fat: 0 });
+    const calculateMacros = (TDEE, goal = "maintenance") => {
+        const macroRatios = {
+            cutting: { carbs: 0.3, protein: 0.4, fat: 0.3 }, // Giảm cân
+            bulking: { carbs: 0.4, protein: 0.3, fat: 0.3 }, // Tăng cơ
+            maintenance: { carbs: 0.5, protein: 0.25, fat: 0.25 } // Duy trì
+        };
+    
+        const { carbs, protein, fat } = macroRatios[goal] || macroRatios.maintenance;
+    
+        return {
+            carbs: Math.round((TDEE * carbs) / 4), // 1g carb = 4 kcal
+            protein: Math.round((TDEE * protein) / 4), // 1g protein = 4 kcal
+            fat: Math.round((TDEE * fat) / 9) // 1g fat = 9 kcal
+        };
+    };
     const handleMealSelection = (meal) => {
         if (selectedItem) {
             console.log("✅ Thêm Activity:", selectedItem);
@@ -181,6 +158,68 @@ export default function HomeScreen() {
         outputRange: [1, 0],
         extrapolate: 'clamp',
     });
+    const [isMacrosLoaded, setIsMacrosLoaded] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // 1 Load userData
+                const userDataResponse = await dispatch(loadUserData()).unwrap();
+
+                // 2 Tính TOTAL_KCAL
+                if (userDataResponse) {
+                    const calculatedTDEE = calculateTDEE(userDataResponse);
+                    setTOTAL_KCAL(calculatedTDEE);
+
+                    // 3 Tính macros sau khi có TOTAL_KCAL
+                    if (userDataResponse?.mainGoal) {
+                        const calculatedMacros = calculateMacros(calculatedTDEE, userDataResponse.mainGoal.toLowerCase());
+                        setMacros(calculatedMacros);
+                        setIsMacrosLoaded(true); // Đánh dấu đã load xong macros
+                    }
+                }
+
+                // 4 Khi macros đã xong, load totalNutrients
+                await dispatch(loadTotalNutrients()).unwrap();
+                await dispatch(loadTodaySectionsData()).unwrap();
+            } catch (error) {
+                console.error("❌ Lỗi khi tải dữ liệu:", error);
+            }
+        };
+
+        fetchData();
+    }, [dispatch]);
+    
+    
+
+    useEffect(() => {
+        if (route.params?.product && !selectedItem) {
+            const productData = JSON.parse(route.params.product);
+            setTimeout(() => {
+                setSelectedItem(productData);
+                setMealSelectionVisible(true);
+            }, 300);
+        }
+    }, [route.params]);
+    useEffect(() => {
+        // console.log("User Data:", userData);
+        console.log(TOTAL_KCAL)
+        console.log(totalNutrients)
+        console.log(macros)
+    }, [userData]);
+    
+
+
+
+    useEffect(() => {
+        Animated.timing(scrollY, {
+            toValue: scrollY.__getValue(), // Giữ nguyên giá trị hiện tại
+            duration: 0,
+            useNativeDriver: true,
+        }).start();
+    }, [todaySelection]);
+
+    
 
     return (
         <View style={[styles.container, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F5F5F5' }]}>
@@ -202,7 +241,7 @@ export default function HomeScreen() {
                 }}
                 scrollEventThrottle={16}
                 showsVerticalScrollIndicator={false}
-
+                
             >
 
                 {/* Progress and Nutrition Stats */}
@@ -217,14 +256,22 @@ export default function HomeScreen() {
                             <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{suppliedKcal}</Text>
                             <Text style={[styles.kcalLabel, { color: isDarkMode ? 'white' : 'gray' }]}>kcal</Text>
                         </View>
-                        <ArcProgress progress={suppliedKcal} size={180} kcalLeft={TOTAL_KCAL - suppliedKcal + burnedKcal} strokeWidth={15} />
+                            {TOTAL_KCAL !== null && (
+                                <ArcProgress 
+                                    progress={suppliedKcal}
+                                    size={180}
+                                    kcalLeft={TOTAL_KCAL - suppliedKcal + Math.round(burnedKcal)}
+                                    strokeWidth={15} 
+                                />
+                            )}
+
                         <View style={styles.nutritionBox}>
                             {/* Thay đổi icon và label cho Burned */}
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <FontAwesome5 name="fire" size={12} color={isDarkMode ? '#FFC107' : '#FFB300'} />
                                 <Text style={[styles.labelText, { color: isDarkMode ? 'white' : 'black', marginLeft: 5 }]}>Burned</Text>
                             </View>
-                            <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{burnedKcal}</Text>
+                            <Text style={[styles.kcalText, { color: isDarkMode ? 'white' : 'black' }]}>{Math.round(burnedKcal)}</Text>
                             <Text style={[styles.kcalLabel, { color: isDarkMode ? 'white' : 'gray' }]}>kcal</Text>
                         </View>
                     </View>
@@ -232,7 +279,7 @@ export default function HomeScreen() {
                     {/* Thêm container cho "Eaten" */}
                     <View style={styles.eatenContainer}>
                         <Text style={[styles.eatenText, { color: isDarkMode ? 'gray' : 'gray' }]}>Eaten </Text>
-                        <Text style={[styles.eatenLine, { color: isDarkMode ? 'gray' : 'gray' }]}> —————————————————————————————————————</Text>
+                        <Text style={[styles.eatenText, styles.eatenLine, { color: isDarkMode ? 'gray' : 'gray' }]}> —————————————————————————————————————</Text>
                     </View>
 
                     <View style={styles.nutritionContainer}>
@@ -240,7 +287,7 @@ export default function HomeScreen() {
                             {
                                 name: "Carbs",
                                 progress: Math.round(totalNutrients.carbohydrates),
-                                max: 200,
+                                max: macros.carbs,
                                 color: "#F44336",
                                 endPointColor: "#F44336",
                                 type: "Carbs",
@@ -249,32 +296,36 @@ export default function HomeScreen() {
                             {
                                 name: "Fat",
                                 progress: Math.round(totalNutrients.fat),
-                                max: 70,
-                                color: "#FF9800",
-                                endPointColor: "#FF9800",
+                                max: macros.fat,
+                                color: "#F44336",
+                                endPointColor: "#F44336",
                                 type: "Fat",
                                 emptyColor: "#FF9800"
                             },
                             {
                                 name: "Protein",
                                 progress: Math.round(totalNutrients.proteins),
-                                max: 150,
-                                color: "#2196F3",
-                                endPointColor: "#2196F3",
+                                max: macros.protein,
+                                color: "#FF9800",
+                                endPointColor: "#FF9800",
                                 type: "Protein",
                                 emptyColor: "#2196F3"
                             }
                         ].map((nutrient, index) => (
                             <View key={index} style={styles.nutritionItem}>
-                                <RingProgress
-                                    progress={Math.round((nutrient.progress / nutrient.max) * 100)}
-                                    size={88}
-                                    strokeWidth={10}
-                                    fillColor={nutrient.color}
-                                    endPointColor={nutrient.endPointColor}
-                                    nutrientType={nutrient.type}
-                                    emptyColor={nutrient.emptyColor}
-                                />
+                               {isMacrosLoaded ? ( 
+                                    <RingProgress
+                                        progress={Math.round((nutrient.progress / nutrient.max) * 100)}
+                                        size={88}
+                                        strokeWidth={10}
+                                        fillColor={nutrient.color}
+                                        endPointColor={nutrient.color}
+                                        nutrientType={nutrient.name}
+                                        emptyColor={nutrient.emptyColor}
+                                    />
+                                ) : (
+                                    <Text style={{ color: "gray" }}>Loading...</Text>
+                                )}
                                 <View style={styles.nutritionInfo}>
                                     <Text style={[styles.nutritionText, { color: isDarkMode ? 'white' : 'black' }]}>
                                         {nutrient.progress}/{nutrient.max} g
@@ -352,7 +403,7 @@ export default function HomeScreen() {
                                 style={[styles.mealButton, { backgroundColor: isDarkMode ? '#444444' : '#DDDDDD' }]}
                                 onPress={() => handleMealSelection(meal)}
                             >
-                                <Text style={[styles.mealButtonText, { color: isDarkMode ? 'white' : 'black' }]}>{meal}</Text>
+                                <Text style={[styles.mealButtonText, { color: isDarkMode ? 'white' : 'black' }]}>{meal} </Text>
                             </TouchableOpacity>
                         ))}
                     </View>
