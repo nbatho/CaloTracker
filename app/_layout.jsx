@@ -50,7 +50,7 @@ function AppContent() {
 
         // Load dữ liệu người dùng
         const userData = await dispatch(loadUserData()).unwrap();
-        console.log("📌 Dữ liệu userData sau khi load:", userData);
+        // console.log("📌 Dữ liệu userData sau khi load:", userData);
 
         if (!userData) {
           console.log("🚀 Chuyển đến Onboarding (do userData null)");

@@ -17,7 +17,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
-import { saveUserData } from '@/components/redux/diarySlice';
+import { saveUserData, loadUserData } from '@/components/redux/diarySlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker'; // Import thư viện ImagePicker
 
@@ -83,9 +83,15 @@ export default function ProfileScreen() {
     const updateUserData = async (updatedData) => {
         try {
             const newUserData = { ...userData, ...updatedData };
-            // console.log("Lưu userData:", newUserData);
-            await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
+    
+            // Cập nhật Redux trước khi lưu vào AsyncStorage
             dispatch(saveUserData(newUserData));
+    
+            // Lưu vào AsyncStorage (không ảnh hưởng ngay đến Redux)
+            await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
+    
+            // Gọi lại `loadUserData` để đảm bảo Redux nhận dữ liệu mới
+            await dispatch(loadUserData()).unwrap();
         } catch (error) {
             console.error("❌ Lỗi khi lưu userData:", error);
         }
@@ -171,7 +177,7 @@ export default function ProfileScreen() {
     };
 
 
-    const activityOptions = ['Sedentary', 'Low Active', 'Active', 'Very Active'];
+    const activityOptions = ['Sedentary', 'Moderate', 'Active', 'Very Active'];
     const genderOptions = ['Male', 'Female', 'Other'];
     const goalOptions = ['Cutting', 'Bulking', 'Maintenance'];
 

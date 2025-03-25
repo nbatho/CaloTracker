@@ -56,7 +56,6 @@ export default function HomeScreen() {
         const birthYear = parseInt(birthday?.year, 10);
         const currentYear = new Date().getFullYear();
         const age = currentYear - birthYear;
-    
         // Kiểm tra dữ liệu hợp lệ
         if (!weight || !height || !age || !gender || !activityLevel) return 0;
     
@@ -76,11 +75,11 @@ export default function HomeScreen() {
             light: 1.375,
             moderate: 1.55,
             active: 1.725,
-            very_active: 1.9,
+            "very active": 1.9,
         };
-    
-        const activityFactor = activityMultipliers[activityLevel] || 1.2; // Mặc định nếu không có giá trị hợp lệ
-    
+        const activityFactor = activityMultipliers[activityLevel.toLowerCase().trim()] || 1.2; // Mặc định nếu không có giá trị hợp lệ
+        console.log(BMR)
+        console.log(activityFactor)
         // Tính TDEE
         const TDEE = Math.round(BMR * activityFactor);
         return TDEE;
@@ -159,36 +158,32 @@ export default function HomeScreen() {
         extrapolate: 'clamp',
     });
     const [isMacrosLoaded, setIsMacrosLoaded] = useState(false);
-
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // 1 Load userData
-                const userDataResponse = await dispatch(loadUserData()).unwrap();
-
-                // 2 Tính TOTAL_KCAL
-                if (userDataResponse) {
-                    const calculatedTDEE = calculateTDEE(userDataResponse);
-                    setTOTAL_KCAL(calculatedTDEE);
-
-                    // 3 Tính macros sau khi có TOTAL_KCAL
-                    if (userDataResponse?.mainGoal) {
-                        const calculatedMacros = calculateMacros(calculatedTDEE, userDataResponse.mainGoal.toLowerCase());
-                        setMacros(calculatedMacros);
-                        setIsMacrosLoaded(true); // Đánh dấu đã load xong macros
-                    }
-                }
-
-                // 4 Khi macros đã xong, load totalNutrients
-                await dispatch(loadTotalNutrients()).unwrap();
-                await dispatch(loadTodaySectionsData()).unwrap();
-            } catch (error) {
-                console.error("❌ Lỗi khi tải dữ liệu:", error);
-            }
+        if (!userData) return;
+    
+        console.log("🔄 User Data Thay Đổi:", userData);
+    
+        // Chuẩn hóa activityLevel để tránh lỗi
+        const cleanedUserData = {
+            ...userData,
+            activityLevel: userData.activityLevel?.toLowerCase().trim()
         };
-
-        fetchData();
-    }, [dispatch]);
+    
+        // 1. Tính lại TDEE
+        const calculatedTDEE = calculateTDEE(cleanedUserData);
+        console.log("🔄 TDEE Cập Nhật:", calculatedTDEE);
+        setTOTAL_KCAL(calculatedTDEE);
+    
+        // 2. Cập nhật macros nếu có mục tiêu
+        if (userData.mainGoal) {
+            const calculatedMacros = calculateMacros(
+                calculatedTDEE,
+                userData.mainGoal.toLowerCase()
+            );
+            setMacros(calculatedMacros);
+            setIsMacrosLoaded(true);
+        }
+    }, [userData]);
     
     
 
@@ -202,10 +197,9 @@ export default function HomeScreen() {
         }
     }, [route.params]);
     useEffect(() => {
-        // console.log("User Data:", userData);
+        console.log("User Data:", userData);
+        console.log("Activity Level:", activityLevel);
         console.log(TOTAL_KCAL)
-        console.log(totalNutrients)
-        console.log(macros)
     }, [userData]);
     
 
@@ -297,8 +291,8 @@ export default function HomeScreen() {
                                 name: "Fat",
                                 progress: Math.round(totalNutrients.fat),
                                 max: macros.fat,
-                                color: "#F44336",
-                                endPointColor: "#F44336",
+                                color: "#FF9800",
+                                endPointColor: "#FF9800",
                                 type: "Fat",
                                 emptyColor: "#FF9800"
                             },
@@ -306,8 +300,8 @@ export default function HomeScreen() {
                                 name: "Protein",
                                 progress: Math.round(totalNutrients.proteins),
                                 max: macros.protein,
-                                color: "#FF9800",
-                                endPointColor: "#FF9800",
+                                color: "#2196F3",
+                                endPointColor: "#2196F3",
                                 type: "Protein",
                                 emptyColor: "#2196F3"
                             }
